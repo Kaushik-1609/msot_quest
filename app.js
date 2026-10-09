@@ -972,349 +972,326 @@ const Arcade = {
     raid: {
         hp: 500,
         maxHp: 500,
-        shieldActive: false
-    },
-
-    // TIER 4: BUG DISARMER STATE
-    bugHunter: {
-        timer: 15,
-        timerInterval: null,
-        activeSnippet: null,
-        snippets: [
-            {
-                code: [
-                    "1: int mid = (low + high) / 2;",
-                    "2: if (arr[mid] == target) return mid;",
-                    "3: else if (arr[mid] < target) high = mid - 1; // BUG!",
-                    "4: else low = mid + 1;"
-                ],
-                bugLine: 2,
-                fix: "arr[mid] < target should increase 'low = mid + 1' not change high!"
-            },
-            {
-                code: [
-                    "1: Node* current = head;",
-                    "2: while (current->next != NULL) {",
-                    "3:     current = current->next->next; // BUG: Potential NULL dereference",
-                    "4: }"
-                ],
-                bugLine: 2,
-                fix: "Skipping node without checking if current->next->next exists causes segfault!"
-            }
-        ]
-    },
+    currentFilter: 'all',
+    clearedGames: new Set(['game_dsa_1', 'game_dsa_3', 'game_html_4']), // Initial cleared games matching screenshot
+    activeGame: null,
+    currentQIdx: 0,
+    lives: 3,
+    score: 0,
+    combo: 0,
+    clueUsed: false,
+    correctCount: 0,
 
     init() {
-        this.initMemoryMatrix();
-        this.initBugHunter();
+        this.renderGamesGrid();
     },
 
-    switchTier(tierId) {
-        this.currentTier = tierId;
-        document.querySelectorAll('.arcade-tier-panel').forEach(p => p.classList.add('hidden'));
-        const activePanel = document.getElementById(`gameTier_${tierId}`);
-        if (activePanel) activePanel.classList.remove('hidden');
+    filterCategory(cat) {
+        this.currentFilter = cat;
+        // Update filter buttons styling
+        const filterBtns = {
+            all: document.getElementById('arcFilter_all'),
+            dsa: document.getElementById('arcFilter_dsa'),
+            html: document.getElementById('arcFilter_html'),
+            cleared: document.getElementById('arcFilter_cleared')
+        };
 
-        document.querySelectorAll('.tier-pill-btn').forEach(btn => {
-            btn.className = "tier-pill-btn p-3.5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white text-left transition flex items-center justify-between";
-        });
-        const activeBtn = document.getElementById(`tierBtn_${tierId}`);
-        if (activeBtn) {
-            activeBtn.className = "tier-pill-btn p-3.5 rounded-2xl border border-amber-500 bg-amber-500/10 text-amber-300 text-left transition flex items-center justify-between";
-        }
-    },
-
-    // TIER 1: SYNTAX BLITZ METHODS
-    startBlitzGame() {
-        const b = this.blitz;
-        b.timer = 30;
-        b.score = 0;
-        b.running = true;
-        b.currentIdx = 0;
-        this.combo = 1;
-        this.updateComboDisplay();
-
-        document.getElementById('blitzScore').textContent = '0';
-        document.getElementById('blitzTimer').textContent = '30s';
-        document.getElementById('btnStartBlitz').classList.add('hidden');
-        document.getElementById('blitzOpt0').disabled = false;
-        document.getElementById('blitzOpt1').disabled = false;
-
-        this.renderBlitzQuestion();
-
-        if (b.timerInterval) clearInterval(b.timerInterval);
-        b.timerInterval = setInterval(() => {
-            b.timer -= 1;
-            document.getElementById('blitzTimer').textContent = `${b.timer}s`;
-            const pct = (b.timer / 30) * 100;
-            document.getElementById('blitzTimeBar').style.width = `${pct}%`;
-
-            if (b.timer <= 0) {
-                clearInterval(b.timerInterval);
-                b.running = false;
-                document.getElementById('blitzOpt0').disabled = true;
-                document.getElementById('blitzOpt1').disabled = true;
-                document.getElementById('btnStartBlitz').classList.remove('hidden');
-                document.getElementById('blitzQuestionText').textContent = `🏁 Blitz Complete! Final Score: ${b.score} Points.`;
-
-                const earnedXp = Math.max(10, Math.floor(b.score / 2));
-                UI.addXP(earnedXp, `Syntax Blitz 30s Challenge (${b.score} pts)`, '⚡');
-                triggerConfetti();
-                sfx.levelUp();
+        Object.keys(filterBtns).forEach(k => {
+            const btn = filterBtns[k];
+            if (!btn) return;
+            if (k === cat) {
+                btn.className = "px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider bg-rose-600 text-white shadow-lg shadow-rose-600/30 transition transform active:scale-95";
+            } else {
+                btn.className = "px-5 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition";
             }
-        }, 1000);
-    },
-
-    renderBlitzQuestion() {
-        const b = this.blitz;
-        const q = b.questions[b.currentIdx % b.questions.length];
-        document.getElementById('blitzCategoryBadge').textContent = q.cat;
-        document.getElementById('blitzQuestionText').textContent = q.q;
-        document.getElementById('blitzOpt0').textContent = `A) ${q.optA}`;
-        document.getElementById('blitzOpt1').textContent = `B) ${q.optB}`;
-    },
-
-    answerBlitz(optIdx) {
-        const b = this.blitz;
-        if (!b.running) return;
-        const q = b.questions[b.currentIdx % b.questions.length];
-        const isCorrect = optIdx === q.correct;
-
-        if (isCorrect) {
-            b.score += 10 * this.combo;
-            this.combo = Math.min(4, this.combo + 1);
-            sfx.xpEarned();
-        } else {
-            this.combo = 1;
-            sfx.wrongAnswer();
-        }
-
-        document.getElementById('blitzScore').textContent = b.score;
-        this.updateComboDisplay();
-        b.currentIdx++;
-        this.renderBlitzQuestion();
-    },
-
-    updateComboDisplay() {
-        const el = document.getElementById('arcadeComboDisplay');
-        if (el) {
-            el.textContent = `x${this.combo}`;
-            el.className = `font-mono font-extrabold text-lg combo-pulse ${this.combo > 1 ? 'text-amber-400' : 'text-slate-400'}`;
-        }
-    },
-
-    // TIER 2: MEMORY MATRIX METHODS
-    initMemoryMatrix() {
-        const m = this.matrix;
-        m.moves = 0;
-        m.matches = 0;
-        m.flippedCards = [];
-        document.getElementById('matrixMoves').textContent = '0';
-        document.getElementById('matrixMatches').textContent = '0 / 4';
-
-        let deck = [];
-        m.pairs.forEach((p, idx) => {
-            deck.push({ id: `c_${idx}_a`, key: p.key, text: p.title, isConcept: true });
-            deck.push({ id: `c_${idx}_b`, key: p.key, text: p.desc, isConcept: false });
         });
 
-        deck.sort(() => Math.random() - 0.5);
-        m.cards = deck;
+        this.renderGamesGrid();
+    },
 
-        const grid = document.getElementById('memoryCardsGrid');
-        if (!grid) return;
-        grid.innerHTML = deck.map((c, i) => `
-            <div class="card-perspective h-28 sm:h-32">
-                <div id="mCard_${c.id}" onclick="Arcade.flipMemoryCard('${c.id}', '${c.key}')"
-                    class="memory-card relative w-full h-full rounded-2xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500/50 transition">
-                    <!-- Front face (hidden initially) -->
-                    <div class="card-face flex flex-col items-center justify-center p-3 text-center bg-slate-900 text-slate-400 font-mono text-xs">
-                        <span class="text-2xl mb-1">❓</span>
-                        <span class="text-[10px] uppercase font-bold text-slate-500">Card ${i + 1}</span>
+    renderGamesGrid() {
+        const grid = document.getElementById('arcadeCardsGrid');
+        if (!grid || typeof ARCADE_GAMES === 'undefined') return;
+
+        // Update cleared count
+        const countEl = document.getElementById('arcClearedCount');
+        if (countEl) countEl.textContent = this.clearedGames.size;
+
+        let filtered = ARCADE_GAMES;
+        if (this.currentFilter === 'dsa') {
+            filtered = ARCADE_GAMES.filter(g => g.category.includes('DSA'));
+        } else if (this.currentFilter === 'html') {
+            filtered = ARCADE_GAMES.filter(g => g.category.includes('HTML') || g.category.includes('WEB'));
+        } else if (this.currentFilter === 'cleared') {
+            filtered = ARCADE_GAMES.filter(g => this.clearedGames.has(g.id));
+        }
+
+        grid.innerHTML = filtered.map(game => {
+            const isCleared = this.clearedGames.has(game.id);
+            const isDsa = game.category.includes('DSA');
+            const catColor = isDsa ? 'text-sky-400 border-sky-500/40 bg-sky-500/10' : 'text-amber-400 border-amber-500/40 bg-amber-500/10';
+            const catLabel = isDsa ? 'DSA IN C++' : 'WEB DEVELOPMENT (HTML)';
+
+            return `
+                <div class="arcade-game-card ${isCleared ? 'is-cleared' : ''}">
+                    <div>
+                        <!-- Header Badge Row: Topic Tag & Cleared Status -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase border ${catColor}">
+                                ${catLabel} • Topic ${game.topicNumber}
+                            </span>
+                            ${isCleared ? `
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                                    <span>CLEARED</span>
+                                    <span>✓</span>
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- Big Topic Icon -->
+                        <div class="text-4xl my-3 select-none">
+                            ${game.icon}
+                        </div>
+
+                        <!-- Title & Subtopic Name -->
+                        <h3 class="text-lg font-black text-white tracking-wide font-cinzel leading-tight">
+                            ${game.title}
+                        </h3>
+                        <p class="text-xs font-bold text-rose-400 mt-1 mb-3">
+                            ${game.topicName}
+                        </p>
+
+                        <!-- Narrative Description -->
+                        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                            ${game.description}
+                        </p>
                     </div>
-                    <!-- Back face (revealed upon flip) -->
-                    <div class="card-face card-back flex flex-col items-center justify-center p-3 text-center bg-gradient-to-tr from-indigo-950 to-slate-900 text-white font-medium text-xs border border-indigo-500/50">
-                        <span class="text-xs font-bold leading-tight">${c.text}</span>
+
+                    <!-- Card Footer: Badge Title & Deploy Button -->
+                    <div class="pt-5 mt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
+                            <span>${game.icon}</span>
+                            <span class="text-[11px] text-slate-300 font-semibold truncate max-w-[110px]">${game.badge}</span>
+                        </div>
+                        <button onclick="Arcade.deployGame('${game.id}')" class="${isCleared ? 'play-again-btn' : 'deploy-game-btn'}">
+                            ${isCleared ? 'PLAY AGAIN ↺' : 'DEPLOY GAME ➔'}
+                        </button>
                     </div>
                 </div>
-            </div>
+            `;
+        }).join('');
+    },
+
+    deployGame(gameId) {
+        const game = ARCADE_GAMES.find(g => g.id === gameId);
+        if (!game) return;
+
+        this.activeGame = game;
+        this.currentQIdx = 0;
+        this.lives = 3;
+        this.score = 0;
+        this.combo = 0;
+        this.clueUsed = false;
+        this.correctCount = 0;
+
+        sfx.gateOpen();
+        const modal = document.getElementById('arcadeGameModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+
+        // Populate Static Game Meta
+        document.getElementById('gameModalCatBadge').textContent = game.category;
+        document.getElementById('gameModalTitle').textContent = game.title;
+        document.getElementById('gameModalSubtitle').textContent = `Topic ${game.topicNumber}: ${game.topicName}`;
+        document.getElementById('gameModalAnimIcon').textContent = game.animationIcon;
+        document.getElementById('gameModalAnimText').textContent = game.animationTitle;
+        document.getElementById('gameModalCaseFile').textContent = game.caseFile;
+        document.getElementById('gameModalCompilerTitle').textContent = `mirai-compiler://${game.id}.cpp`;
+
+        // Reset Victory overlay
+        const victory = document.getElementById('gameModalVictoryOverlay');
+        if (victory) victory.classList.add('hidden');
+
+        // Update Stats HUD
+        this.updateGameStatsHud();
+
+        // Render First Question
+        this.renderCurrentQuestion();
+    },
+
+    updateGameStatsHud() {
+        // Lives
+        const livesEl = document.getElementById('gameModalLives');
+        if (livesEl) {
+            let hearts = '';
+            for (let i = 0; i < 3; i++) {
+                hearts += i < this.lives ? '❤️' : '🖤';
+            }
+            livesEl.textContent = hearts;
+        }
+
+        // Score
+        const scoreEl = document.getElementById('gameModalScore');
+        if (scoreEl) scoreEl.textContent = `${this.score} XP`;
+
+        // Combo
+        const comboEl = document.getElementById('gameModalCombo');
+        if (comboEl) comboEl.textContent = `${this.combo}x 🔥`;
+    },
+
+    renderCurrentQuestion() {
+        const game = this.activeGame;
+        if (!game || this.currentQIdx >= game.questions.length) {
+            this.showVictoryScreen();
+            return;
+        }
+
+        const q = game.questions[this.currentQIdx];
+        this.clueUsed = false;
+
+        // Question Trackers
+        document.getElementById('gameModalQTracker').textContent = `Question ${this.currentQIdx + 1} of ${game.questions.length}`;
+        document.getElementById('gameModalQType').textContent = q.type;
+        document.getElementById('gameModalQuestionStatement').textContent = q.question;
+        document.getElementById('gameModalCodeBlock').textContent = q.code;
+
+        // Hide feedback
+        const feedback = document.getElementById('gameModalFeedback');
+        if (feedback) feedback.classList.add('hidden');
+
+        // Options
+        const optionsGrid = document.getElementById('gameModalOptionsGrid');
+        if (!optionsGrid) return;
+
+        const letters = ['A', 'B', 'C', 'D'];
+        optionsGrid.innerHTML = q.options.map((opt, idx) => `
+            <button onclick="Arcade.answerOption(${idx})" id="gameOptBtn_${idx}" class="game-option-btn">
+                <span class="w-6 h-6 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-mono font-bold text-slate-400 flex-shrink-0">
+                    ${letters[idx]}
+                </span>
+                <span class="font-mono text-xs sm:text-sm text-slate-100">${this.escapeHtml(opt)}</span>
+            </button>
         `).join('');
     },
 
-    flipMemoryCard(cardId, pairKey) {
-        const m = this.matrix;
-        const cardEl = document.getElementById(`mCard_${cardId}`);
-        if (!cardEl || cardEl.classList.contains('is-flipped') || m.flippedCards.length >= 2) return;
+    answerOption(optIdx) {
+        const game = this.activeGame;
+        if (!game) return;
+        const q = game.questions[this.currentQIdx];
+        const isCorrect = optIdx === q.correct;
 
-        cardEl.classList.add('is-flipped');
-        sfx.xpEarned();
-        m.flippedCards.push({ id: cardId, key: pairKey, el: cardEl });
+        const clickedBtn = document.getElementById(`gameOptBtn_${optIdx}`);
+        const correctBtn = document.getElementById(`gameOptBtn_${q.correct}`);
 
-        if (m.flippedCards.length === 2) {
-            m.moves++;
-            document.getElementById('matrixMoves').textContent = m.moves;
-            const [c1, c2] = m.flippedCards;
+        // Disable all option buttons temporarily
+        const allBtns = document.querySelectorAll('.game-option-btn');
+        allBtns.forEach(b => b.disabled = true);
 
-            if (c1.key === c2.key) {
-                // Match found!
-                m.matches++;
-                document.getElementById('matrixMatches').textContent = `${m.matches} / 4`;
-                m.flippedCards = [];
-                sfx.xpEarned();
+        const feedback = document.getElementById('gameModalFeedback');
 
-                if (m.matches === 4) {
-                    setTimeout(() => {
-                        triggerConfetti();
-                        sfx.levelUp();
-                        alert('🎉 Matrix Solved! You matched all algorithmic pairs in ' + m.moves + ' moves! +40 XP awarded.');
-                        UI.addXP(40, 'Memory Matrix 3D Solved', '🃏');
-                    }, 400);
-                }
-            } else {
-                // Not a match, flip back
-                setTimeout(() => {
-                    c1.el.classList.remove('is-flipped');
-                    c2.el.classList.remove('is-flipped');
-                    m.flippedCards = [];
-                }, 900);
+        if (isCorrect) {
+            if (clickedBtn) clickedBtn.classList.add('opt-correct');
+            this.combo++;
+            const earned = 15 * this.combo;
+            this.score += earned;
+            this.correctCount++;
+            sfx.bossHit();
+
+            if (feedback) {
+                feedback.className = "p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-medium";
+                feedback.innerHTML = `<strong>✨ Correct! (+${earned} XP):</strong> ${q.explanation}`;
+                feedback.classList.remove('hidden');
             }
-        }
-    },
 
-    // TIER 3: TITAN RAID 2.0 COMBAT
-    castBossSpell(type) {
-        const r = this.raid;
-        if (r.hp <= 0) {
-            alert('The Titan is already defeated! Click refresh to respawn.');
-            return;
-        }
+            this.updateGameStatsHud();
 
-        let dmg = 0;
-        let spellName = '';
-
-        if (type === 'slash') {
-            dmg = 50;
-            spellName = '⚔️ Code Slash';
-            sfx.bossHit();
-        } else if (type === 'fireball') {
-            dmg = 110;
-            spellName = '🔥 Recursion Blast';
-            sfx.bossHit();
-        } else if (type === 'lightning') {
-            dmg = 180;
-            spellName = '⚡ DP Lightning (CRITICAL)';
-            sfx.levelUp();
-        } else if (type === 'shield') {
-            r.shieldActive = true;
-            this.logCombat('[DEFENSE] Shield Barrier activated! Next boss attack will be absorbed.');
-            sfx.xpEarned();
-            return;
-        }
-
-        r.hp = Math.max(0, r.hp - dmg);
-        this.updateRaidHpDisplay();
-        this.triggerScreenShake();
-        this.showFloatingDamage(`-${dmg} HP!`, dmg >= 150);
-        this.logCombat(`[HERO HIT] Cast ${spellName} for ${dmg} damage to the Mid-Term Titan!`);
-
-        UI.addXP(Math.round(dmg / 3), `${spellName} on Titan`, '⚔️');
-
-        if (r.hp === 0) {
-            triggerConfetti();
-            sfx.levelUp();
-            this.logCombat('🏆 [VICTORY] Mid-Term Titan has been slain! +150 XP Victory Bonus!');
-            UI.addXP(150, 'Titan Slayer Grand Raid Bonus', '👑');
-        } else {
-            // Boss counter-attacks after 600ms
+            // Next question after 1.1s
             setTimeout(() => {
-                if (r.shieldActive) {
-                    this.logCombat('🛡️ [SHIELDED] Titan swung with Tail Swipe, but your Shield Barrier completely blocked the attack!');
-                    r.shieldActive = false;
-                } else {
-                    this.logCombat('⚠️ [TITAN COUNTER] Boss roared back with Mid-Term Anxiety Breath!');
-                    this.triggerScreenShake();
-                }
-            }, 600);
-        }
-    },
-
-    updateRaidHpDisplay() {
-        const r = this.raid;
-        const pct = Math.round((r.hp / r.maxHp) * 100);
-        document.getElementById('raidHpFill').style.width = `${pct}%`;
-        document.getElementById('raidHpText').textContent = `${r.hp} / ${r.maxHp} HP (${pct}%)`;
-    },
-
-    logCombat(msg) {
-        const box = document.getElementById('raidCombatLog');
-        if (!box) return;
-        const entry = document.createElement('div');
-        entry.textContent = msg;
-        box.prepend(entry);
-    },
-
-    triggerScreenShake() {
-        const arena = document.getElementById('bossArenaContainer');
-        if (arena) {
-            arena.classList.add('shake-active');
-            setTimeout(() => arena.classList.remove('shake-active'), 450);
-        }
-    },
-
-    showFloatingDamage(text, isCrit) {
-        const container = document.getElementById('damageNumberContainer');
-        if (!container) return;
-        const el = document.createElement('div');
-        el.className = `floating-damage text-2xl sm:text-3xl ${isCrit ? 'text-yellow-400' : 'text-red-500'}`;
-        el.textContent = text;
-        container.appendChild(el);
-        setTimeout(() => el.remove(), 800);
-    },
-
-    // TIER 4: CYBER BUG HUNTER
-    initBugHunter() {
-        const bh = this.bugHunter;
-        if (bh.timerInterval) clearInterval(bh.timerInterval);
-        bh.timer = 15;
-        document.getElementById('bugBombTimer').textContent = '15s';
-
-        bh.activeSnippet = bh.snippets[Math.floor(Math.random() * bh.snippets.length)];
-        const container = document.getElementById('codeLinesContainer');
-        if (!container) return;
-
-        container.innerHTML = bh.activeSnippet.code.map((line, idx) => `
-            <div onclick="Arcade.checkBugLine(${idx})"
-                class="p-2.5 rounded-lg bg-slate-900 hover:bg-red-950/40 border border-slate-800 hover:border-red-500/50 cursor-pointer transition flex items-center justify-between group">
-                <span class="text-slate-300 font-mono text-xs group-hover:text-red-300">${line}</span>
-                <span class="text-[10px] text-slate-500 group-hover:text-red-400 font-bold uppercase">Click if Buggy &rarr;</span>
-            </div>
-        `).join('');
-
-        bh.timerInterval = setInterval(() => {
-            bh.timer--;
-            document.getElementById('bugBombTimer').textContent = `${bh.timer}s`;
-            if (bh.timer <= 0) {
-                clearInterval(bh.timerInterval);
-                sfx.wrongAnswer();
-                alert('💥 BOOM! The bomb detonated before the bug was identified. Try another round!');
-            }
-        }, 1000);
-    },
-
-    checkBugLine(idx) {
-        const bh = this.bugHunter;
-        if (bh.timerInterval) clearInterval(bh.timerInterval);
-
-        if (idx === bh.activeSnippet.bugLine) {
-            triggerConfetti();
-            sfx.levelUp();
-            alert(`🎉 BOMB DEFUSED! Great eye! Fix: ${bh.activeSnippet.fix} (+50 XP awarded!)`);
-            UI.addXP(50, 'Disarmed Critical Server Logic Bug', '💣');
+                this.currentQIdx++;
+                this.renderCurrentQuestion();
+            }, 1100);
         } else {
+            if (clickedBtn) clickedBtn.classList.add('opt-wrong');
+            if (correctBtn) correctBtn.classList.add('opt-correct');
+            this.lives--;
+            this.combo = 0;
             sfx.wrongAnswer();
-            alert('❌ That line is mathematically valid! The timer runs out faster!');
-            bh.timer = Math.max(1, bh.timer - 5);
+
+            if (feedback) {
+                feedback.className = "p-3.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs font-medium";
+                feedback.innerHTML = `<strong>❌ Incorrect (-1 Life):</strong> ${q.explanation}`;
+                feedback.classList.remove('hidden');
+            }
+
+            this.updateGameStatsHud();
+
+            if (this.lives <= 0) {
+                setTimeout(() => {
+                    alert('💔 Mission Failed! You lost all lives. Re-deploying scenario!');
+                    this.deployGame(game.id);
+                }, 1300);
+            } else {
+                setTimeout(() => {
+                    this.currentQIdx++;
+                    this.renderCurrentQuestion();
+                }, 1400);
+            }
         }
+    },
+
+    showClue() {
+        if (this.clueUsed || !this.activeGame) return;
+        const q = this.activeGame.questions[this.currentQIdx];
+        this.clueUsed = true;
+        this.score = Math.max(0, this.score - 5);
+        this.updateGameStatsHud();
+
+        const feedback = document.getElementById('gameModalFeedback');
+        if (feedback) {
+            feedback.className = "p-3.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-medium";
+            feedback.innerHTML = `<strong>💡 Tactical Clue (-5 XP):</strong> ${q.clue}`;
+            feedback.classList.remove('hidden');
+        }
+        sfx.xpEarned();
+    },
+
+    showVictoryScreen() {
+        const game = this.activeGame;
+        if (!game) return;
+
+        this.clearedGames.add(game.id);
+        triggerConfetti();
+        sfx.levelUp();
+
+        const totalEarned = Math.max(30, this.score);
+        UI.addXP(totalEarned, `Cleared Arcade: ${game.title} (${game.badge})`, game.icon);
+
+        const overlay = document.getElementById('gameModalVictoryOverlay');
+        if (overlay) {
+            document.getElementById('victoryBadgeName').textContent = game.badge;
+            document.getElementById('victoryScoreText').textContent = `+${totalEarned} XP`;
+            const accuracy = Math.round((this.correctCount / game.questions.length) * 100);
+            document.getElementById('victoryAccuracyText').textContent = `${accuracy}%`;
+            overlay.classList.remove('hidden');
+        }
+
+        this.renderGamesGrid();
+    },
+
+    closeGameModal() {
+        const modal = document.getElementById('arcadeGameModal');
+        if (modal) modal.classList.add('hidden');
+        this.activeGame = null;
+        this.renderGamesGrid();
+    },
+
+    escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#039;');
     }
 };
 

@@ -74,6 +74,22 @@ code, .font-mono {
     mix-blend-mode: screen;
 }
 
+/* 3D Robot Containers */
+#robot3DContainer, #gateRobot3DContainer {
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#robot3DContainer canvas, #gateRobot3DContainer canvas {
+    width: 100% !important;
+    height: 100% !important;
+    outline: none;
+    pointer-events: none;
+}
+
 /* Blackbox.ai Card Spotlight illumination */
 .glass-panel, .glass-card, .neon-inner {
     position: relative;
@@ -144,7 +160,7 @@ code, .font-mono {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.9s cubic-bezier(0.85, 0, 0.15, 1), visibility 0.9s;
+    transition: opacity 0.7s cubic-bezier(0.85, 0, 0.15, 1) 0.7s, visibility 0.7s ease 0.7s;
     perspective: 1200px;
 }
 
@@ -615,3 +631,141 @@ code, .font-mono {
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* ==========================================================
+   17 ARCADE GAMES CARDS & MODAL STYLES (SCREENSHOT REPLICA)
+   ========================================================== */
+.arcade-game-card {
+    background: linear-gradient(165deg, #111728 0%, #090d18 100%);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.arcade-game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ef4444, transparent);
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.arcade-game-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(239, 68, 68, 0.15);
+}
+
+.arcade-game-card:hover::before {
+    opacity: 1;
+}
+
+.arcade-game-card.is-cleared {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.arcade-game-card.is-cleared::before {
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+}
+
+.deploy-game-btn {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.deploy-game-btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    transform: scale(1.02);
+}
+
+.play-again-btn {
+    background: rgba(15, 23, 42, 0.8);
+    color: #f87171;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.6rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    transition: all 0.2s ease;
+}
+
+.play-again-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.96) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.game-option-btn {
+    background: #0d1322;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    text-align: left;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.game-option-btn:hover:not(:disabled) {
+    background: #1e293b;
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.game-option-btn.opt-correct {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: #10b981 !important;
+    color: #a7f3d0 !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.game-option-btn.opt-wrong {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #fca5a5 !important;
+    animation: shakeAnim 0.4s ease;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+@keyframes shakeAnim {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
