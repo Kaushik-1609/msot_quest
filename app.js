@@ -56,6 +56,32 @@ class SoundFX {
     wrongAnswer() {
         this.playTone(200, 0.3, 'sawtooth', 0.1);
     }
+
+    punch() {
+        this.playTone(180, 0.12, 'square', 0.25);
+        setTimeout(() => this.playTone(90, 0.15, 'sawtooth', 0.2), 40);
+    }
+
+    heavyPunch() {
+        this.playTone(120, 0.2, 'sawtooth', 0.3);
+        setTimeout(() => this.playTone(60, 0.25, 'triangle', 0.3), 60);
+    }
+
+    fightBell() {
+        this.playTone(1200, 0.4, 'sine', 0.2);
+        setTimeout(() => this.playTone(1200, 0.6, 'sine', 0.25), 250);
+    }
+
+    ko() {
+        this.playTone(150, 0.6, 'sawtooth', 0.3);
+        setTimeout(() => this.playTone(200, 0.5, 'square', 0.25), 300);
+        setTimeout(() => this.playTone(80, 0.8, 'triangle', 0.35), 600);
+    }
+
+    gateOpen() {
+        this.playTone(70, 0.8, 'sawtooth', 0.2);
+        setTimeout(() => this.playTone(100, 0.6, 'triangle', 0.15), 300);
+    }
 }
 
 const sfx = new SoundFX();
@@ -683,17 +709,45 @@ const UI = {
         document.getElementById('roleBtnFaculty').className = role === 'faculty' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white';
     },
 
+    switchTab(targetTab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        const tabEl = document.getElementById(`tab_${targetTab}`);
+        if (tabEl) tabEl.classList.remove('hidden');
+
+        document.querySelectorAll('.tab-nav-btn').forEach(b => {
+            b.classList.remove('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60');
+            if (b.getAttribute('data-tab') === targetTab) {
+                b.classList.add('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60');
+            }
+        });
+
+        if (targetTab === 'fight') {
+            CodeFighter.init();
+        }
+    },
+
+    enterGates() {
+        sfx.gateOpen();
+        const gateOverlay = document.getElementById('heroGateOverlay');
+        if (gateOverlay) {
+            gateOverlay.classList.add('gate-opened');
+        }
+    },
+
+    showHeroGate() {
+        const gateOverlay = document.getElementById('heroGateOverlay');
+        if (gateOverlay) {
+            gateOverlay.classList.remove('gate-opened');
+        }
+    },
+
     attachEventListeners() {
         // Tab Switching in student portal
         const tabBtns = document.querySelectorAll('.tab-nav-btn');
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetTab = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(`tab_${targetTab}`).classList.remove('hidden');
-
-                tabBtns.forEach(b => b.classList.remove('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60'));
-                btn.classList.add('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60');
+                this.switchTab(targetTab);
             });
         });
     },
@@ -1258,10 +1312,275 @@ const Arcade = {
     }
 };
 
+// ==========================================================
+// 2-PERSON 1V1 CODE FIGHTER (STREET FIGHTER DO-OR-DIE DUEL)
+// ==========================================================
+const CodeFighter = {
+    playerHp: 100,
+    rivalHp: 100,
+    round: 1,
+    timer: 15,
+    timerInterval: null,
+    inAction: false,
+    currentQuestion: null,
+
+    rivals: [
+        { name: "Syntax Imp", sprite: "👾", maxHp: 100, title: "BUG TIER 1", roundName: "ROUND 1: SYNTAX IMP" },
+        { name: "NullPointer Ninja", sprite: "🥷", maxHp: 100, title: "BUG TIER 2", roundName: "ROUND 2: NULLPOINTER NINJA" },
+        { name: "Recursion Demon Lord", sprite: "👹", maxHp: 100, title: "FINAL BOSS", roundName: "ROUND 3: DEMON LORD" }
+    ],
+
+    questions: [
+        {
+            q: "Which data structure follows FIFO and is used in BFS graph traversal?",
+            options: ["Queue", "Stack", "Priority Queue", "Hash Map"],
+            correct: 0
+        },
+        {
+            q: "What is the worst-case time complexity of QuickSort?",
+            options: ["O(N log N)", "O(N²)", "O(log N)", "O(1)"],
+            correct: 1
+        },
+        {
+            q: "In C++, which keyword is used to dynamically allocate memory on heap?",
+            options: ["malloc", "new", "alloc", "create"],
+            correct: 1
+        },
+        {
+            q: "Which tree traversal outputs BST nodes in strictly sorted ascending order?",
+            options: ["Pre-Order", "In-Order", "Post-Order", "Level-Order"],
+            correct: 1
+        },
+        {
+            q: "What is the space complexity of an iterative Binary Search algorithm?",
+            options: ["O(1)", "O(log N)", "O(N)", "O(N²)"],
+            correct: 0
+        },
+        {
+            q: "Which data structure allows O(1) amortized insertion and removal from both ends?",
+            options: ["Singly Linked List", "Deque", "Binary Heap", "Stack"],
+            correct: 1
+        },
+        {
+            q: "Detecting a cycle in a Directed Graph can be efficiently solved using:",
+            options: ["DFS with recursion stack", "Linear Search", "Bubble Sort", "Binary Search"],
+            correct: 0
+        }
+    ],
+
+    init() {
+        this.playerHp = 100;
+        this.rivalHp = 100;
+        this.updateRivalProfile();
+        this.updateHud();
+        this.loadNextQuestion();
+        sfx.fightBell();
+    },
+
+    updateRivalProfile() {
+        const rival = this.rivals[(this.round - 1) % this.rivals.length];
+        const rName = document.getElementById('fightRivalName');
+        const rSprite = document.getElementById('fighterRival');
+        const rBadge = document.getElementById('rivalBadgeLabel');
+        const rRound = document.getElementById('fightRoundBadge');
+        const pName = document.getElementById('fightPlayerName');
+
+        if (rName) rName.textContent = rival.name;
+        if (rSprite) rSprite.textContent = rival.sprite;
+        if (rBadge) rBadge.textContent = rival.title;
+        if (rRound) rRound.textContent = rival.roundName;
+        if (pName) pName.textContent = `${AppState.student.name} (Defender)`;
+    },
+
+    updateHud() {
+        const playerBar = document.getElementById('fightPlayerHpBar');
+        const playerText = document.getElementById('fightPlayerHpText');
+        const rivalBar = document.getElementById('fightRivalHpBar');
+        const rivalText = document.getElementById('fightRivalHpText');
+
+        if (playerBar) playerBar.style.width = `${Math.max(0, this.playerHp)}%`;
+        if (playerText) playerText.textContent = `${Math.max(0, this.playerHp)} / 100 HP`;
+
+        if (rivalBar) rivalBar.style.width = `${Math.max(0, this.rivalHp)}%`;
+        if (rivalText) rivalText.textContent = `${Math.max(0, this.rivalHp)} / 100 HP`;
+    },
+
+    loadNextQuestion() {
+        if (this.playerHp <= 0 || this.rivalHp <= 0) return;
+        this.inAction = false;
+        clearInterval(this.timerInterval);
+
+        const q = this.questions[Math.floor(Math.random() * this.questions.length)];
+        this.currentQuestion = q;
+        const promptEl = document.getElementById('fightQuestionPrompt');
+        if (promptEl) promptEl.textContent = q.q;
+
+        const grid = document.getElementById('fightMovesGrid');
+        if (grid) {
+            grid.innerHTML = q.options.map((opt, idx) => `
+                <button onclick="CodeFighter.handleMoveChoice(${idx})"
+                    class="fight-move-btn text-left p-3.5 rounded-xl border border-slate-700 bg-slate-900/90 hover:bg-slate-800 hover:border-rose-500 font-medium text-xs text-slate-200 transition transform active:scale-95 flex items-center justify-between">
+                    <span><strong class="font-mono text-rose-400 mr-2">${String.fromCharCode(65 + idx)}.</strong> ${opt}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">PUNCH ➔</span>
+                </button>
+            `).join('');
+        }
+
+        this.timer = 15;
+        const timerDisp = document.getElementById('fightTimerDisplay');
+        if (timerDisp) timerDisp.textContent = `⏱️ ${this.timer}s`;
+
+        this.timerInterval = setInterval(() => {
+            this.timer--;
+            if (timerDisp) timerDisp.textContent = `⏱️ ${this.timer}s`;
+            if (this.timer <= 0) {
+                clearInterval(this.timerInterval);
+                this.executeRivalPunch("Time expired! Rival countered with Speed Jab!");
+            }
+        }, 1000);
+    },
+
+    handleMoveChoice(selectedIdx) {
+        if (this.inAction || this.playerHp <= 0 || this.rivalHp <= 0) return;
+        this.inAction = true;
+        clearInterval(this.timerInterval);
+
+        // Disable buttons
+        document.querySelectorAll('.fight-move-btn').forEach(b => b.disabled = true);
+
+        const isCorrect = selectedIdx === this.currentQuestion.correct;
+        if (isCorrect) {
+            this.executePlayerPunch();
+        } else {
+            this.executeRivalPunch("Wrong answer! Rival dodged and countered!");
+        }
+    },
+
+    executePlayerPunch() {
+        const playerSprite = document.getElementById('fighterPlayer');
+        const rivalSprite = document.getElementById('fighterRival');
+        const spark = document.getElementById('fightHitSpark');
+        const floatText = document.getElementById('fightFloatingText');
+
+        if (playerSprite) playerSprite.classList.add('player-punching');
+        sfx.punch();
+
+        setTimeout(() => {
+            // Hit lands on rival!
+            if (spark) spark.classList.remove('hidden');
+            if (floatText) {
+                floatText.textContent = "💥 PUNCH LANDED! -25 HP";
+                floatText.className = "font-mono font-black text-2xl sm:text-3xl text-emerald-400 drop-shadow-lg";
+            }
+            if (rivalSprite) rivalSprite.classList.add('rival-hurt');
+            this.rivalHp = Math.max(0, this.rivalHp - 25);
+            this.updateHud();
+
+            setTimeout(() => {
+                if (spark) spark.classList.add('hidden');
+                if (playerSprite) playerSprite.classList.remove('player-punching');
+                if (rivalSprite) rivalSprite.classList.remove('rival-hurt');
+
+                if (this.rivalHp <= 0) {
+                    this.triggerKnockout(true);
+                } else {
+                    this.loadNextQuestion();
+                }
+            }, 600);
+        }, 220);
+    },
+
+    executeRivalPunch(reason) {
+        const playerSprite = document.getElementById('fighterPlayer');
+        const rivalSprite = document.getElementById('fighterRival');
+        const spark = document.getElementById('fightHitSpark');
+        const floatText = document.getElementById('fightFloatingText');
+        const arena = document.getElementById('fightArenaWrapper');
+
+        if (rivalSprite) rivalSprite.classList.add('rival-punching');
+        sfx.heavyPunch();
+
+        setTimeout(() => {
+            // Hit lands on player!
+            if (spark) spark.classList.remove('hidden');
+            if (floatText) {
+                floatText.textContent = "💥 ENEMY COUNTER PUNCH! -25 HP";
+                floatText.className = "font-mono font-black text-2xl sm:text-3xl text-rose-500 drop-shadow-lg";
+            }
+            if (playerSprite) playerSprite.classList.add('player-hurt');
+            if (arena) arena.classList.add('shake-active', 'damage-flash');
+            this.playerHp = Math.max(0, this.playerHp - 25);
+            this.updateHud();
+
+            setTimeout(() => {
+                if (spark) spark.classList.add('hidden');
+                if (rivalSprite) rivalSprite.classList.remove('rival-punching');
+                if (playerSprite) playerSprite.classList.remove('player-hurt');
+                if (arena) arena.classList.remove('shake-active', 'damage-flash');
+
+                if (this.playerHp <= 0) {
+                    this.triggerKnockout(false);
+                } else {
+                    this.loadNextQuestion();
+                }
+            }, 600);
+        }, 220);
+    },
+
+    triggerKnockout(playerWon) {
+        clearInterval(this.timerInterval);
+        const banner = document.getElementById('fightKoBanner');
+        const bannerText = document.getElementById('koBannerText');
+        const subText = document.getElementById('koSubText');
+
+        if (banner) banner.classList.remove('hidden');
+        if (playerWon) {
+            sfx.ko();
+            triggerConfetti();
+            if (bannerText) {
+                bannerText.textContent = "K.O.! VICTORY!";
+                bannerText.className = "text-5xl sm:text-7xl font-black font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 tracking-wider ko-banner-anim";
+            }
+            if (subText) {
+                subText.textContent = `Devastating final punch! You defeated ${this.rivals[(this.round - 1) % this.rivals.length].name}! +60 XP Awarded!`;
+            }
+            UI.addXP(60, `1v1 Code Fighter: Defeated Round ${this.round}`, '🥊');
+        } else {
+            sfx.wrongAnswer();
+            if (bannerText) {
+                bannerText.textContent = "K.O.! DEFEATED!";
+                bannerText.className = "text-5xl sm:text-7xl font-black font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 tracking-wider ko-banner-anim";
+            }
+            if (subText) {
+                subText.textContent = "You took too many heavy punches from the bug lord! Regroup and rematch!";
+            }
+        }
+    },
+
+    nextFightRound() {
+        const banner = document.getElementById('fightKoBanner');
+        if (banner) banner.classList.add('hidden');
+        this.round++;
+        this.playerHp = 100;
+        this.rivalHp = 100;
+        this.updateRivalProfile();
+        this.updateHud();
+        this.loadNextQuestion();
+        sfx.fightBell();
+    },
+
+    restartMatch() {
+        const banner = document.getElementById('fightKoBanner');
+        if (banner) banner.classList.add('hidden');
+        this.init();
+    }
+};
+
 // Start application on page load
 window.addEventListener('DOMContentLoaded', () => {
     UI.init();
     initCyberCanvas();
     Arcade.init();
+    CodeFighter.init();
 });
 

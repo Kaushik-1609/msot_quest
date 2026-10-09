@@ -35,6 +35,46 @@
     <!-- Interactive Background Particle Cyber Canvas -->
     <canvas id="cyberCanvas"></canvas>
 
+    <!-- DRAMATIC HERO GATE EXPERIENCE (MATCHING REFERENCE SITE) -->
+    <div id="heroGateOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#07090f] overflow-hidden transition-all duration-1000">
+        <div class="gate-fire-glow"></div>
+        <div class="gate-door-left flex flex-col justify-between p-8 border-r-2 border-red-500/40 shadow-2xl">
+            <div class="text-xs font-mono text-red-500/70 tracking-widest uppercase">未来工科大学 • MSOT PROTOCOL 01</div>
+            <div class="text-3xl sm:text-5xl font-black text-red-500/10 font-cinzel rotate-90 origin-left select-none">CODE GATE</div>
+            <div class="text-xs font-mono text-slate-500">GATE ARCHIVE • FALL 2026</div>
+        </div>
+        <div class="gate-door-right flex flex-col justify-between p-8 border-l-2 border-red-500/40 shadow-2xl text-right">
+            <div class="text-xs font-mono text-red-500/70 tracking-widest uppercase">CRUCIBLE OF CODERS</div>
+            <div class="text-3xl sm:text-5xl font-black text-red-500/10 font-cinzel -rotate-90 origin-right select-none">MSOT QUEST</div>
+            <div class="text-xs font-mono text-slate-500">ALL BUGS SHALL PERISH</div>
+        </div>
+
+        <!-- Center Gate Content Layer -->
+        <div class="relative z-20 text-center max-w-2xl px-6 space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-xs font-mono text-red-400 font-bold tracking-wider">
+                <span>⛩️ RELIC 01 • THE GATES OF MSOT</span>
+            </div>
+            
+            <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight font-cinzel leading-none drop-shadow-2xl">
+                Abandon All Bugs,<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-amber-300">Ye Who Enter Here.</span>
+            </h1>
+            
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg mx-auto">
+                Towering gates part in red smoke and firelight — a crucible for coders who want to be remembered. Enter to experience 1v1 Street Fighter Code Duels, boss raids, and daily trials.
+            </p>
+
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="UI.enterGates()" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:to-orange-500 text-white font-black text-sm uppercase tracking-wider shadow-2xl shadow-red-600/50 transform hover:scale-105 transition flex items-center justify-center gap-2">
+                    <span>⚡ ENTER THE GATES / 開門 ➔</span>
+                </button>
+                <button onclick="UI.enterGates(); UI.switchTab('fight');" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2">
+                    <span>🥊 Jump Straight to 1v1 Fight</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <!-- Logo & College Brand -->
@@ -89,6 +129,11 @@
 
         <!-- Right Controls: Role Switcher & Profile -->
         <div class="flex items-center gap-3">
+            <!-- Dramatic Hero Gate Trigger Button -->
+            <button onclick="UI.showHeroGate()" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 rounded-xl text-xs font-bold text-red-300 flex items-center gap-1.5 transition hover:scale-105" title="Experience The Gates of MSOT">
+                <span>⛩️ The Gates</span>
+            </button>
+
             <!-- Sound Toggle -->
             <button onclick="sfx.enabled = !sfx.enabled; this.textContent = sfx.enabled ? '🔊' : '🔇';" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-sm" title="Toggle Sound FX">
                 🔊
@@ -165,6 +210,11 @@
             <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
                 <button data-tab="overview" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-bold border border-indigo-500 text-indigo-400 bg-slate-800/60 transition flex items-center gap-2">
                     <span>🏰 Hub & Quests</span>
+                </button>
+                <button data-tab="fight" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-black text-rose-300 border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 transition flex items-center gap-2 shadow-lg shadow-rose-500/20">
+                    <span class="animate-pulse">🥊</span>
+                    <span>1v1 Code Fighter</span>
+                    <span class="bg-gradient-to-r from-rose-600 to-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">DO OR DIE</span>
                 </button>
                 <button data-tab="arcade" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-extrabold text-amber-300 border border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20 transition flex items-center gap-2 shadow-lg shadow-amber-500/10">
                     <span class="animate-bounce">🎮</span>
@@ -656,7 +706,141 @@
 
             </div>
 
-        </div>
+            <!-- ========================================== -->
+            <!-- TAB: 1V1 CODE FIGHTER (2-PERSON DO OR DIE) -->
+            <!-- ========================================== -->
+            <div id="tab_fight" class="tab-content hidden space-y-6">
+                <!-- Fight Arena Container -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0c0f1d] via-[#140b17] to-[#0a0c16] border-2 border-rose-500/30 p-6 sm:p-10 shadow-2xl" id="fightArenaWrapper">
+                    
+                    <!-- Dojo Top Ring Banner & Round Tracker -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-rose-950/80">
+                        <div class="flex items-center gap-3">
+                            <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
+                            <span class="font-cinzel font-black tracking-widest text-rose-400 text-xs uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">
+                                🥋 CYBER DOJO • 1V1 DO-OR-DIE CODE DUEL
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono font-bold text-slate-300" id="fightRoundBadge">ROUND 1</span>
+                            <span class="px-3 py-1 bg-rose-600 text-white rounded-lg text-xs font-mono font-black" id="fightTimerDisplay">⏱️ 15s</span>
+                            <button onclick="CodeFighter.restartMatch()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition">
+                                🔄 Rematch
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fighting HUD: Health Bars & VS Emblem -->
+                    <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center pt-6">
+                        <!-- Player 1 HP Bar (Left) -->
+                        <div class="md:col-span-3 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-md bg-indigo-600/30 border border-indigo-500 flex items-center justify-center text-xs">P1</span>
+                                    <span class="text-white font-mono" id="fightPlayerName">Shreysh (Student Warrior)</span>
+                                </div>
+                                <span class="font-mono text-emerald-400 text-sm font-black" id="fightPlayerHpText">100 / 100 HP</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-5 rounded-xl overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+                                <div id="fightPlayerHpBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 rounded-lg transition-all duration-300" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Center VS Badge -->
+                        <div class="md:col-span-1 text-center py-2">
+                            <div class="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-500 items-center justify-center font-black text-xl text-white shadow-xl shadow-rose-600/50 transform hover:scale-110 transition animate-pulse">
+                                VS
+                            </div>
+                        </div>
+
+                        <!-- Player 2 / Rival HP Bar (Right) -->
+                        <div class="md:col-span-3 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span class="font-mono text-rose-400 text-sm font-black" id="fightRivalHpText">100 / 100 HP</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-rose-300 font-mono" id="fightRivalName">Shadow Bug Ninja</span>
+                                    <span class="w-6 h-6 rounded-md bg-rose-600/30 border border-rose-500 flex items-center justify-center text-xs">RIVAL</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-950 h-5 rounded-xl overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+                                <div id="fightRivalHpBar" class="h-full bg-gradient-to-l from-rose-600 via-red-500 to-orange-400 rounded-lg transition-all duration-300" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMBAT STAGE (THE TWO CHARACTERS FIGHTING) -->
+                    <div class="relative min-h-[220px] sm:min-h-[260px] flex items-center justify-between px-6 sm:px-16 my-6 bg-slate-950/60 rounded-3xl border border-rose-950/60 overflow-hidden">
+                        
+                        <!-- Neon Ring Ground Grid Floor -->
+                        <div class="absolute inset-0 bg-[radial-gradient(#e11d48_1px,transparent_1px)] [background-size:20px_20px] opacity-15 pointer-events-none"></div>
+
+                        <!-- Left Fighter (Player) -->
+                        <div class="relative z-10 text-center select-none">
+                            <div id="fighterPlayer" class="fighter-idle-player text-7xl sm:text-8xl drop-shadow-[0_0_25px_rgba(99,102,241,0.6)] cursor-pointer">
+                                🥋
+                            </div>
+                            <div class="mt-2 text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 inline-block">
+                                YOU (DEFENDER)
+                            </div>
+                        </div>
+
+                        <!-- Center Impact & Hit Spark Zone -->
+                        <div class="relative z-20 flex flex-col items-center justify-center">
+                            <div id="fightHitSpark" class="hit-spark hidden"></div>
+                            <div id="fightFloatingText" class="font-mono font-black text-2xl sm:text-3xl text-yellow-400 drop-shadow-lg min-h-[40px] flex items-center justify-center"></div>
+                        </div>
+
+                        <!-- Right Fighter (Rival) -->
+                        <div class="relative z-10 text-center select-none">
+                            <div id="fighterRival" class="fighter-idle-rival text-7xl sm:text-8xl drop-shadow-[0_0_25px_rgba(244,63,94,0.6)] cursor-pointer">
+                                🥷
+                            </div>
+                            <div class="mt-2 text-[11px] font-mono font-bold bg-rose-500/20 text-rose-300 px-2.5 py-0.5 rounded-full border border-rose-500/30 inline-block" id="rivalBadgeLabel">
+                                RIVAL (BUG LORD)
+                            </div>
+                        </div>
+
+                        <!-- K.O. Victory / Defeat Overlay Banner -->
+                        <div id="fightKoBanner" class="hidden absolute inset-0 z-30 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center space-y-4">
+                            <div id="koBannerText" class="text-5xl sm:text-7xl font-black font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 tracking-wider ko-banner-anim">
+                                K.O.!
+                            </div>
+                            <p id="koSubText" class="text-slate-200 text-sm font-semibold max-w-md">
+                                You landed a devastating punch and knocked out the Shadow Bug Ninja!
+                            </p>
+                            <div class="pt-2 flex flex-wrap justify-center gap-3">
+                                <button onclick="CodeFighter.nextFightRound()" class="px-6 py-3 bg-gradient-to-r from-rose-600 to-amber-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-rose-600/30 hover:scale-105 transition">
+                                    ⚔️ Next Challenger / Fight Again
+                                </button>
+                                <button onclick="UI.switchTab('overview')" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+                                    Return to Hub
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FIGHT ACTION / QUESTION MOVE CONSOLE -->
+                    <div class="bg-slate-950/80 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+                            <span class="text-rose-400 font-bold">⚡ PUNCH COMBAT RULE:</span>
+                            <span class="text-slate-400">Right Answer = <strong class="text-emerald-400">You Punch Rival (-25 HP)</strong> | Wrong = <strong class="text-rose-400">Rival Punches You (-25 HP)</strong></span>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+                            <span class="text-[11px] font-mono uppercase text-slate-400 block mb-1">Incoming Attack Challenge</span>
+                            <h4 id="fightQuestionPrompt" class="text-base sm:text-lg font-bold text-white min-h-[44px] flex items-center justify-center">
+                                Loading fight round...
+                            </h4>
+                        </div>
+
+                        <!-- 4 Punch Option Buttons -->
+                        <div id="fightMovesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            <!-- Populated by CodeFighter JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
 
         <!-- ========================================== -->
         <!-- VIEW 2: FACULTY & ADMIN INTELLIGENCE PORTAL-->
