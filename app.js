@@ -782,6 +782,12 @@ const UI = {
     },
 
     attachEventListeners() {
+        // Gate Enter buttons
+        const enterBtn = document.getElementById('enterGateBtn');
+        if (enterBtn) enterBtn.addEventListener('click', (e) => this.enterGate(e));
+        const skipBtn = document.getElementById('skipGateBtn');
+        if (skipBtn) skipBtn.addEventListener('click', (e) => this.enterGate(e));
+
         // Tab Switching in student portal
         const tabBtns = document.querySelectorAll('.tab-nav-btn');
         tabBtns.forEach(btn => {
@@ -1015,7 +1021,9 @@ const Arcade = {
     // TIER 3: RAID BOSS STATE
     raid: {
         hp: 500,
-        maxHp: 500,
+        maxHp: 500
+    },
+
     currentFilter: 'all',
     clearedGames: new Set(['game_dsa_1', 'game_dsa_3', 'game_html_4']), // Initial cleared games matching screenshot
     activeGame: null,

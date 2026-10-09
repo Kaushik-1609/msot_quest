@@ -99,10 +99,10 @@
                 &ldquo;Every skill is a power. Every challenge is a quest. Every day, become stronger.&rdquo;
             </p>
             <div class="flex flex-col sm:flex-row gap-4 items-center">
-                <button type="button" onclick="UI.enterGate(event)" class="px-8 py-4 bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.6)] transform hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                <button id="enterGateBtn" type="button" onclick="if(window.UI&&window.UI.enterGate){window.UI.enterGate(event)}else{document.getElementById('heroGateOverlay').style.display='none'}" class="px-8 py-4 bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.6)] transform hover:scale-105 active:scale-95 transition-all cursor-pointer">
                     ⛩️ [ ENTER THE GAME WORLD ] ➔
                 </button>
-                <button type="button" onclick="UI.enterGate(event)" class="px-5 py-3.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold rounded-2xl transition cursor-pointer">
+                <button id="skipGateBtn" type="button" onclick="if(window.UI&&window.UI.enterGate){window.UI.enterGate(event)}else{document.getElementById('heroGateOverlay').style.display='none'}" class="px-5 py-3.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold rounded-2xl transition cursor-pointer">
                     ✕ Skip Directly into Arena
                 </button>
             </div>
