@@ -1,20 +1,28 @@
 /* ==========================================================
-   MSOT QUEST - GAMIFIED LEARNING PLATFORM STYLES
+   MSOT QUEST - GAMIFIED LEARNING PLATFORM ADVANCED STYLES
    ========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@700;900&display=swap');
 
 :root {
     --primary: #4f46e5;
-    --primary-glow: rgba(79, 70, 229, 0.4);
+    --primary-glow: rgba(79, 70, 229, 0.5);
     --gold: #f59e0b;
     --fire: #ef4444;
     --emerald: #10b981;
+    --cyan: #06b6d4;
+    --magenta: #d946ef;
 }
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.font-game {
+    font-family: 'Orbitron', sans-serif;
 }
 
 code, .font-mono {
@@ -27,40 +35,112 @@ code, .font-mono {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: #0f172a;
+    background: #090d16;
 }
 ::-webkit-scrollbar-thumb {
     background: #334155;
     border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: #6366f1;
+}
+
+/* Animated Cyber Grid Canvas Background */
+#cyberCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+}
+
+/* Screen Shake Effect */
+@keyframes screenShake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(-6px, 4px) rotate(-1deg); }
+    40% { transform: translate(6px, -4px) rotate(1deg); }
+    60% { transform: translate(-4px, -2px) rotate(0deg); }
+    80% { transform: translate(4px, 2px) rotate(1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake-active {
+    animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Floating Damage Text */
+@keyframes floatUpFade {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-30px) scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.9);
+    }
+}
+
+.floating-damage {
+    position: absolute;
+    animation: floatUpFade 0.8s ease-out forwards;
+    pointer-events: none;
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    z-index: 50;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+}
+
+/* Neon Gradient Animated Borders */
+@keyframes borderRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.neon-border {
+    position: relative;
+    border-radius: 1.25rem;
+    background: linear-gradient(60deg, #6366f1, #ec4899, #3b82f6, #10b981);
+    background-size: 300% 300%;
+    animation: borderRotate 6s ease alternate infinite;
+    padding: 1.5px;
+}
+
+.neon-inner {
+    background: #0d1322;
+    border-radius: calc(1.25rem - 1.5px);
 }
 
 /* Flame animation for streak */
 @keyframes flameFlicker {
     0%, 100% {
-        transform: scale(1) rotate(-1deg);
-        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
+        transform: scale(1) rotate(-2deg);
+        filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.9));
     }
     50% {
-        transform: scale(1.15) rotate(2deg);
-        filter: drop-shadow(0 0 20px rgba(249, 115, 22, 1));
+        transform: scale(1.25) rotate(3deg);
+        filter: drop-shadow(0 0 24px rgba(249, 115, 22, 1));
     }
 }
 
 .flame-active {
-    animation: flameFlicker 1.8s ease-in-out infinite;
+    animation: flameFlicker 1.5s ease-in-out infinite;
     display: inline-block;
 }
 
 /* Boss Monster Floating Animation */
 @keyframes bossFloat {
     0%, 100% {
-        transform: translateY(0px) rotate(0deg);
+        transform: translateY(0px) scale(1) rotate(0deg);
     }
     50% {
-        transform: translateY(-8px) rotate(1deg);
+        transform: translateY(-12px) scale(1.04) rotate(1deg);
     }
 }
 
@@ -77,36 +157,54 @@ code, .font-mono {
 .hp-bar-fill {
     background: linear-gradient(90deg, #ef4444, #f59e0b, #ef4444);
     background-size: 200% 100%;
-    animation: hpShimmer 3s linear infinite;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: hpShimmer 2.5s linear infinite;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Level Up Badge Pulse */
-@keyframes badgeGlow {
-    0%, 100% {
-        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
-    }
+/* Combo multiplier pulse */
+@keyframes comboPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(3deg); filter: drop-shadow(0 0 15px #f59e0b); }
 }
 
-.glow-card {
-    animation: badgeGlow 4s ease-in-out infinite;
+.combo-pulse {
+    animation: comboPulse 0.4s ease-in-out;
+}
+
+/* 3D Memory Card Flip Styles */
+.card-perspective {
+    perspective: 1000px;
+}
+
+.memory-card {
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.memory-card.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 1rem;
+}
+
+.card-back {
+    transform: rotateY(180deg);
 }
 
 /* Glassmorphism Classes */
 .glass-panel {
-    background: rgba(15, 23, 42, 0.75);
+    background: rgba(13, 19, 34, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-card-hover {
@@ -114,18 +212,30 @@ code, .font-mono {
 }
 
 .glass-card-hover:hover {
-    transform: translateY(-3px);
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.25);
+    transform: translateY(-4px);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 14px 35px -10px rgba(79, 70, 229, 0.35);
 }
 
-/* Shimmer animation for points */
-@keyframes shimmerGold {
-    0% { opacity: 0.8; }
-    50% { opacity: 1; transform: scale(1.05); }
-    100% { opacity: 0.8; }
+/* Glowing Neon Buttons */
+.btn-cyber-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    transition: all 0.2s ease;
 }
 
-.gold-pulse {
-    animation: shimmerGold 2s infinite ease-in-out;
+.btn-cyber-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.7);
+}
+
+.btn-cyber-red {
+    background: linear-gradient(135deg, #dc2626, #ea580c);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-cyber-red:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.7);
 }

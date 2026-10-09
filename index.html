@@ -30,7 +30,10 @@
     <script src="config.js"></script>
     <script src="app.js" defer></script>
 </head>
-<body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16">
+<body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16 relative">
+
+    <!-- Interactive Background Particle Cyber Canvas -->
+    <canvas id="cyberCanvas"></canvas>
 
     <!-- Top Navigation Bar -->
     <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
@@ -162,6 +165,11 @@
             <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
                 <button data-tab="overview" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-bold border border-indigo-500 text-indigo-400 bg-slate-800/60 transition flex items-center gap-2">
                     <span>🏰 Hub & Quests</span>
+                </button>
+                <button data-tab="arcade" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-extrabold text-amber-300 border border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20 transition flex items-center gap-2 shadow-lg shadow-amber-500/10">
+                    <span class="animate-bounce">🎮</span>
+                    <span>Tiered Game Arena</span>
+                    <span class="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">4 TIERS</span>
                 </button>
                 <button data-tab="quiz" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
                     <span>📝 Daily Syllabus Quiz</span>
@@ -384,6 +392,268 @@
                         <!-- Populated by JS -->
                     </div>
                 </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB: TIERED LEARNING GAME ARENA            -->
+            <!-- ========================================== -->
+            <div id="tab_arcade" class="tab-content hidden space-y-6">
+                <!-- Arena Hero Header -->
+                <div class="neon-border">
+                    <div class="neon-inner p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold tracking-wider uppercase">
+                                    ⚡ GAMIFIED ACADEMIC ARENA
+                                </span>
+                                <span class="text-xs text-slate-400 font-mono">Boredom-Proof Learning System</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                Level Up Through 4 Challenge Tiers 🎮
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
+                                Test quick reflexes, match algorithmic patterns, raid mid-term bosses, and disarm buggy code before the timer hits zero!
+                            </p>
+                        </div>
+
+                        <!-- Mini Stats for Arcade -->
+                        <div class="flex items-center gap-4 bg-slate-950/70 p-3 rounded-2xl border border-slate-800 self-start md:self-auto">
+                            <div class="text-center px-3">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">Arcade XP</span>
+                                <span class="font-mono font-extrabold text-amber-400 text-lg" id="arcadeXpEarned">+140</span>
+                            </div>
+                            <div class="h-8 w-px bg-slate-800"></div>
+                            <div class="text-center px-3">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">Current Combo</span>
+                                <span class="font-mono font-extrabold text-orange-400 text-lg" id="arcadeComboDisplay">x1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier Selector Switcher Pills -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <button onclick="Arcade.switchTier('t1')" id="tierBtn_t1" class="tier-pill-btn p-3.5 rounded-2xl border border-amber-500 bg-amber-500/10 text-amber-300 text-left transition flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider block text-amber-400">Tier 1: Bronze</span>
+                            <h4 class="font-bold text-sm text-white">Syntax Blitz</h4>
+                            <p class="text-[11px] text-slate-400">30s Rapid DSA Rush</p>
+                        </div>
+                        <span class="text-2xl">⚡</span>
+                    </button>
+
+                    <button onclick="Arcade.switchTier('t2')" id="tierBtn_t2" class="tier-pill-btn p-3.5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white text-left transition flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider block text-slate-400">Tier 2: Silver</span>
+                            <h4 class="font-bold text-sm text-slate-200">Memory Matrix</h4>
+                            <p class="text-[11px] text-slate-400">3D Card Flip Match</p>
+                        </div>
+                        <span class="text-2xl">🃏</span>
+                    </button>
+
+                    <button onclick="Arcade.switchTier('t3')" id="tierBtn_t3" class="tier-pill-btn p-3.5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white text-left transition flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider block text-slate-400">Tier 3: Gold</span>
+                            <h4 class="font-bold text-sm text-slate-200">Titan Boss Raid</h4>
+                            <p class="text-[11px] text-slate-400">Combat Skills & HP</p>
+                        </div>
+                        <span class="text-2xl">🐉</span>
+                    </button>
+
+                    <button onclick="Arcade.switchTier('t4')" id="tierBtn_t4" class="tier-pill-btn p-3.5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white text-left transition flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-mono font-bold uppercase tracking-wider block text-slate-400">Tier 4: Diamond</span>
+                            <h4 class="font-bold text-sm text-slate-200">Bug Disarmer</h4>
+                            <p class="text-[11px] text-slate-400">Defuse Time Bomb</p>
+                        </div>
+                        <span class="text-2xl">💣</span>
+                    </button>
+                </div>
+
+                <!-- TIER 1 GAME: SYNTAX BLITZ (RAPID FIRE) -->
+                <div id="gameTier_t1" class="arcade-tier-panel glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl font-bold text-white">⚡ Syntax Blitz: 30-Second Rapid Fire</h3>
+                                <span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-mono font-bold">+10 XP / Correct</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Answer as many rapid questions as possible before the clock expires! Build your combo for bonus multipliers.</p>
+                        </div>
+
+                        <!-- Timer & Combo Bar -->
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <span class="text-[11px] text-slate-400 block font-mono">TIME LEFT</span>
+                                <span id="blitzTimer" class="font-mono font-extrabold text-2xl text-red-400">30s</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[11px] text-slate-400 block font-mono">SCORE</span>
+                                <span id="blitzScore" class="font-mono font-extrabold text-2xl text-emerald-400">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Blitz Progress Bar -->
+                    <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div id="blitzTimeBar" class="h-full bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+
+                    <!-- Blitz Question & Option Arena -->
+                    <div class="bg-slate-950/70 p-6 sm:p-8 rounded-2xl border border-slate-800 text-center space-y-6">
+                        <div class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-mono font-semibold" id="blitzCategoryBadge">
+                            Data Structures & Time Complexity
+                        </div>
+
+                        <h4 id="blitzQuestionText" class="text-lg sm:text-xl font-bold text-slate-100 max-w-xl mx-auto min-h-[50px] flex items-center justify-center">
+                            Press "Start Blitz" to begin the 30-second challenge!
+                        </h4>
+
+                        <!-- 2 Glowing Action Choices -->
+                        <div id="blitzOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto pt-2">
+                            <button id="blitzOpt0" disabled onclick="Arcade.answerBlitz(0)" class="py-4 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-sm transition transform active:scale-95 disabled:opacity-50">
+                                Option A
+                            </button>
+                            <button id="blitzOpt1" disabled onclick="Arcade.answerBlitz(1)" class="py-4 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-sm transition transform active:scale-95 disabled:opacity-50">
+                                Option B
+                            </button>
+                        </div>
+
+                        <!-- Start Button -->
+                        <div class="pt-2">
+                            <button id="btnStartBlitz" onclick="Arcade.startBlitzGame()" class="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm tracking-wider uppercase shadow-lg shadow-amber-500/25 transition transform hover:scale-105">
+                                🚀 Start 30s Blitz Challenge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIER 2 GAME: MEMORY MATRIX (3D CARD FLIP) -->
+                <div id="gameTier_t2" class="arcade-tier-panel hidden glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl font-bold text-white">🃏 DSA Memory Matrix: 3D Hologram Cards</h3>
+                                <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-mono font-bold">+40 XP / Solved</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Flip and match algorithmic concepts with their optimal use-cases in minimum moves.</p>
+                        </div>
+
+                        <div class="flex items-center gap-4 text-xs font-mono">
+                            <span class="text-slate-400">Moves: <strong id="matrixMoves" class="text-white">0</strong></span>
+                            <span class="text-slate-400">Matched: <strong id="matrixMatches" class="text-emerald-400">0 / 4</strong></span>
+                            <button onclick="Arcade.initMemoryMatrix()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300">
+                                🔄 Shuffle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Card Grid (8 cards) -->
+                    <div id="memoryCardsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto py-2">
+                        <!-- Populated by JS with 3D Flip Cards -->
+                    </div>
+                </div>
+
+                <!-- TIER 3 GAME: MID-TERM TITAN BOSS RAID 2.0 -->
+                <div id="gameTier_t3" class="arcade-tier-panel hidden relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-red-950/40 to-slate-900 border border-red-500/30 p-6 sm:p-10 text-center space-y-6" id="bossArenaContainer">
+                    <div class="max-w-2xl mx-auto space-y-4">
+                        <span class="text-xs font-mono font-black tracking-widest text-red-400 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/30">
+                            🔥 TIER 3 CO-OP RAID COMBAT
+                        </span>
+
+                        <div id="bossAvatar2" class="boss-float text-7xl sm:text-8xl my-2 select-none relative inline-block">
+                            🐉
+                            <div id="damageNumberContainer" class="absolute inset-0 flex items-center justify-center"></div>
+                        </div>
+
+                        <h3 class="text-2xl sm:text-3xl font-black text-white">The Mid-Term Titan 2.0</h3>
+                        <p class="text-xs text-slate-300">
+                            Unleash your DSA abilities to deplete the boss HP! Avoid boss counter-attacks by using your Shield Wall.
+                        </p>
+
+                        <!-- Boss Health Bar -->
+                        <div class="space-y-1.5 pt-2">
+                            <div class="flex justify-between text-xs font-mono font-bold">
+                                <span class="text-red-400">TITAN HP INTEGRITY</span>
+                                <span id="raidHpText" class="text-amber-300">500 / 500 HP (100%)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-5 rounded-full overflow-hidden p-1 border border-red-900/60">
+                                <div id="raidHpFill" class="h-full hp-bar-fill rounded-full" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 4 Combat Skill Buttons -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+                            <button onclick="Arcade.castBossSpell('slash')" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-red-500 text-left transition transform active:scale-95 group">
+                                <span class="text-2xl block mb-1">⚔️</span>
+                                <h5 class="text-xs font-bold text-white group-hover:text-red-300">Code Slash</h5>
+                                <span class="text-[10px] text-red-400 font-mono font-bold">-50 DMG</span>
+                            </button>
+
+                            <button onclick="Arcade.castBossSpell('fireball')" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-orange-500 text-left transition transform active:scale-95 group">
+                                <span class="text-2xl block mb-1">🔥</span>
+                                <h5 class="text-xs font-bold text-white group-hover:text-orange-300">Recursion Fire</h5>
+                                <span class="text-[10px] text-orange-400 font-mono font-bold">-110 DMG</span>
+                            </button>
+
+                            <button onclick="Arcade.castBossSpell('lightning')" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-yellow-500 text-left transition transform active:scale-95 group">
+                                <span class="text-2xl block mb-1">⚡</span>
+                                <h5 class="text-xs font-bold text-white group-hover:text-yellow-300">DP Lightning</h5>
+                                <span class="text-[10px] text-yellow-400 font-mono font-bold">-180 CRIT</span>
+                            </button>
+
+                            <button onclick="Arcade.castBossSpell('shield')" class="p-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-sky-500 text-left transition transform active:scale-95 group">
+                                <span class="text-2xl block mb-1">🛡️</span>
+                                <h5 class="text-xs font-bold text-white group-hover:text-sky-300">Shield Barrier</h5>
+                                <span class="text-[10px] text-sky-400 font-mono font-bold">BLOCK NEXT</span>
+                            </button>
+                        </div>
+
+                        <!-- Combat Log -->
+                        <div id="raidCombatLog" class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-xs font-mono text-slate-400 text-left max-h-24 overflow-y-auto">
+                            [Combat Ready] Select an ability above to attack the Mid-Term Titan!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIER 4 GAME: CYBER BUG DISARMER -->
+                <div id="gameTier_t4" class="arcade-tier-panel hidden glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl font-bold text-white">💣 Cyber Bug Disarmer: Defuse the Code Bomb</h3>
+                                <span class="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded font-mono font-bold">+50 XP / Defused</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">A logic bug has been injected into the MSOT server! Identify and click the broken line before the bomb detonates.</p>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="text-[11px] text-slate-400 font-mono block">BOMB DETONATION IN</span>
+                            <span id="bugBombTimer" class="font-mono font-black text-2xl text-red-500 animate-pulse">15s</span>
+                        </div>
+                    </div>
+
+                    <!-- Terminal Code Snippet Container -->
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 font-mono text-sm space-y-2 max-w-2xl mx-auto shadow-2xl">
+                        <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-xs text-slate-500">
+                            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                            <span>binary_search_handler.cpp</span>
+                        </div>
+
+                        <div id="codeLinesContainer" class="space-y-1.5 pt-2">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button onclick="Arcade.initBugHunter()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 transition">
+                            🔄 Load Another Code Bomb
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
         </div>

@@ -804,7 +804,464 @@ const UI = {
     }
 };
 
+// ==========================================================
+// INTERACTIVE CYBER PARTICLE CANVAS BACKGROUND
+// ==========================================================
+function initCyberCanvas() {
+    const canvas = document.getElementById('cyberCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const count = 40;
+
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.7,
+            vy: (Math.random() - 0.5) * 0.7,
+            radius: Math.random() * 2 + 1,
+            color: i % 2 === 0 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(236, 72, 153, 0.3)'
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < count; i++) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+
+            for (let j = i + 1; j < count; j++) {
+                const p2 = particles[j];
+                const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (dist < 110) {
+                    ctx.strokeStyle = `rgba(99, 102, 241, ${0.15 * (1 - dist / 110)})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+// ==========================================================
+// TIERED GAME ARENA CONTROLLER
+// ==========================================================
+const Arcade = {
+    currentTier: 't1',
+    totalArcadeXp: 140,
+    combo: 1,
+
+    // TIER 1: SYNTAX BLITZ STATE
+    blitz: {
+        timer: 30,
+        timerInterval: null,
+        score: 0,
+        running: false,
+        currentIdx: 0,
+        questions: [
+            { q: "What is the worst-case time complexity of Binary Search?", optA: "O(log N)", optB: "O(N)", correct: 0, cat: "Algorithms" },
+            { q: "Which data structure follows the LIFO principle?", optA: "Queue", optB: "Stack", correct: 1, cat: "Data Structures" },
+            { q: "What is the average lookup time in a Hash Map?", optA: "O(1)", optB: "O(N)", correct: 0, cat: "Hash Tables" },
+            { q: "Which traversal of a BST yields sorted order?", optA: "In-Order", optB: "Pre-Order", correct: 0, cat: "Trees" },
+            { q: "Breadth-First Search (BFS) is implemented using:", optA: "Queue", optB: "Stack", correct: 0, cat: "Graphs" },
+            { q: "Merge Sort follows which algorithmic paradigm?", optA: "Divide & Conquer", optB: "Greedy", correct: 0, cat: "Sorting" },
+            { q: "Is a Tree an Undirected Acyclic Graph?", optA: "Yes", optB: "No", correct: 0, cat: "Graph Theory" },
+            { q: "Time complexity of inserting at head of a Singly Linked List?", optA: "O(1)", optB: "O(N)", correct: 0, cat: "Linked Lists" }
+        ]
+    },
+
+    // TIER 2: MEMORY MATRIX STATE
+    matrix: {
+        cards: [],
+        flippedCards: [],
+        matches: 0,
+        moves: 0,
+        pairs: [
+            { key: 'stack', title: '🥞 Stack', desc: 'Call Stack & Undo Operations' },
+            { key: 'queue', title: '🚶‍♂️ Queue', desc: 'BFS & Printer Task Spooler' },
+            { key: 'hash', title: '🗺️ Hash Map', desc: 'O(1) Average Key-Value Lookup' },
+            { key: 'bst', title: '🌲 BST', desc: 'In-Order Traversal Gives Sorted' }
+        ]
+    },
+
+    // TIER 3: RAID BOSS STATE
+    raid: {
+        hp: 500,
+        maxHp: 500,
+        shieldActive: false
+    },
+
+    // TIER 4: BUG DISARMER STATE
+    bugHunter: {
+        timer: 15,
+        timerInterval: null,
+        activeSnippet: null,
+        snippets: [
+            {
+                code: [
+                    "1: int mid = (low + high) / 2;",
+                    "2: if (arr[mid] == target) return mid;",
+                    "3: else if (arr[mid] < target) high = mid - 1; // BUG!",
+                    "4: else low = mid + 1;"
+                ],
+                bugLine: 2,
+                fix: "arr[mid] < target should increase 'low = mid + 1' not change high!"
+            },
+            {
+                code: [
+                    "1: Node* current = head;",
+                    "2: while (current->next != NULL) {",
+                    "3:     current = current->next->next; // BUG: Potential NULL dereference",
+                    "4: }"
+                ],
+                bugLine: 2,
+                fix: "Skipping node without checking if current->next->next exists causes segfault!"
+            }
+        ]
+    },
+
+    init() {
+        this.initMemoryMatrix();
+        this.initBugHunter();
+    },
+
+    switchTier(tierId) {
+        this.currentTier = tierId;
+        document.querySelectorAll('.arcade-tier-panel').forEach(p => p.classList.add('hidden'));
+        const activePanel = document.getElementById(`gameTier_${tierId}`);
+        if (activePanel) activePanel.classList.remove('hidden');
+
+        document.querySelectorAll('.tier-pill-btn').forEach(btn => {
+            btn.className = "tier-pill-btn p-3.5 rounded-2xl border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-white text-left transition flex items-center justify-between";
+        });
+        const activeBtn = document.getElementById(`tierBtn_${tierId}`);
+        if (activeBtn) {
+            activeBtn.className = "tier-pill-btn p-3.5 rounded-2xl border border-amber-500 bg-amber-500/10 text-amber-300 text-left transition flex items-center justify-between";
+        }
+    },
+
+    // TIER 1: SYNTAX BLITZ METHODS
+    startBlitzGame() {
+        const b = this.blitz;
+        b.timer = 30;
+        b.score = 0;
+        b.running = true;
+        b.currentIdx = 0;
+        this.combo = 1;
+        this.updateComboDisplay();
+
+        document.getElementById('blitzScore').textContent = '0';
+        document.getElementById('blitzTimer').textContent = '30s';
+        document.getElementById('btnStartBlitz').classList.add('hidden');
+        document.getElementById('blitzOpt0').disabled = false;
+        document.getElementById('blitzOpt1').disabled = false;
+
+        this.renderBlitzQuestion();
+
+        if (b.timerInterval) clearInterval(b.timerInterval);
+        b.timerInterval = setInterval(() => {
+            b.timer -= 1;
+            document.getElementById('blitzTimer').textContent = `${b.timer}s`;
+            const pct = (b.timer / 30) * 100;
+            document.getElementById('blitzTimeBar').style.width = `${pct}%`;
+
+            if (b.timer <= 0) {
+                clearInterval(b.timerInterval);
+                b.running = false;
+                document.getElementById('blitzOpt0').disabled = true;
+                document.getElementById('blitzOpt1').disabled = true;
+                document.getElementById('btnStartBlitz').classList.remove('hidden');
+                document.getElementById('blitzQuestionText').textContent = `🏁 Blitz Complete! Final Score: ${b.score} Points.`;
+
+                const earnedXp = Math.max(10, Math.floor(b.score / 2));
+                UI.addXP(earnedXp, `Syntax Blitz 30s Challenge (${b.score} pts)`, '⚡');
+                triggerConfetti();
+                sfx.levelUp();
+            }
+        }, 1000);
+    },
+
+    renderBlitzQuestion() {
+        const b = this.blitz;
+        const q = b.questions[b.currentIdx % b.questions.length];
+        document.getElementById('blitzCategoryBadge').textContent = q.cat;
+        document.getElementById('blitzQuestionText').textContent = q.q;
+        document.getElementById('blitzOpt0').textContent = `A) ${q.optA}`;
+        document.getElementById('blitzOpt1').textContent = `B) ${q.optB}`;
+    },
+
+    answerBlitz(optIdx) {
+        const b = this.blitz;
+        if (!b.running) return;
+        const q = b.questions[b.currentIdx % b.questions.length];
+        const isCorrect = optIdx === q.correct;
+
+        if (isCorrect) {
+            b.score += 10 * this.combo;
+            this.combo = Math.min(4, this.combo + 1);
+            sfx.xpEarned();
+        } else {
+            this.combo = 1;
+            sfx.wrongAnswer();
+        }
+
+        document.getElementById('blitzScore').textContent = b.score;
+        this.updateComboDisplay();
+        b.currentIdx++;
+        this.renderBlitzQuestion();
+    },
+
+    updateComboDisplay() {
+        const el = document.getElementById('arcadeComboDisplay');
+        if (el) {
+            el.textContent = `x${this.combo}`;
+            el.className = `font-mono font-extrabold text-lg combo-pulse ${this.combo > 1 ? 'text-amber-400' : 'text-slate-400'}`;
+        }
+    },
+
+    // TIER 2: MEMORY MATRIX METHODS
+    initMemoryMatrix() {
+        const m = this.matrix;
+        m.moves = 0;
+        m.matches = 0;
+        m.flippedCards = [];
+        document.getElementById('matrixMoves').textContent = '0';
+        document.getElementById('matrixMatches').textContent = '0 / 4';
+
+        let deck = [];
+        m.pairs.forEach((p, idx) => {
+            deck.push({ id: `c_${idx}_a`, key: p.key, text: p.title, isConcept: true });
+            deck.push({ id: `c_${idx}_b`, key: p.key, text: p.desc, isConcept: false });
+        });
+
+        deck.sort(() => Math.random() - 0.5);
+        m.cards = deck;
+
+        const grid = document.getElementById('memoryCardsGrid');
+        if (!grid) return;
+        grid.innerHTML = deck.map((c, i) => `
+            <div class="card-perspective h-28 sm:h-32">
+                <div id="mCard_${c.id}" onclick="Arcade.flipMemoryCard('${c.id}', '${c.key}')"
+                    class="memory-card relative w-full h-full rounded-2xl border border-slate-800 bg-slate-900/80 hover:border-indigo-500/50 transition">
+                    <!-- Front face (hidden initially) -->
+                    <div class="card-face flex flex-col items-center justify-center p-3 text-center bg-slate-900 text-slate-400 font-mono text-xs">
+                        <span class="text-2xl mb-1">❓</span>
+                        <span class="text-[10px] uppercase font-bold text-slate-500">Card ${i + 1}</span>
+                    </div>
+                    <!-- Back face (revealed upon flip) -->
+                    <div class="card-face card-back flex flex-col items-center justify-center p-3 text-center bg-gradient-to-tr from-indigo-950 to-slate-900 text-white font-medium text-xs border border-indigo-500/50">
+                        <span class="text-xs font-bold leading-tight">${c.text}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    flipMemoryCard(cardId, pairKey) {
+        const m = this.matrix;
+        const cardEl = document.getElementById(`mCard_${cardId}`);
+        if (!cardEl || cardEl.classList.contains('is-flipped') || m.flippedCards.length >= 2) return;
+
+        cardEl.classList.add('is-flipped');
+        sfx.xpEarned();
+        m.flippedCards.push({ id: cardId, key: pairKey, el: cardEl });
+
+        if (m.flippedCards.length === 2) {
+            m.moves++;
+            document.getElementById('matrixMoves').textContent = m.moves;
+            const [c1, c2] = m.flippedCards;
+
+            if (c1.key === c2.key) {
+                // Match found!
+                m.matches++;
+                document.getElementById('matrixMatches').textContent = `${m.matches} / 4`;
+                m.flippedCards = [];
+                sfx.xpEarned();
+
+                if (m.matches === 4) {
+                    setTimeout(() => {
+                        triggerConfetti();
+                        sfx.levelUp();
+                        alert('🎉 Matrix Solved! You matched all algorithmic pairs in ' + m.moves + ' moves! +40 XP awarded.');
+                        UI.addXP(40, 'Memory Matrix 3D Solved', '🃏');
+                    }, 400);
+                }
+            } else {
+                // Not a match, flip back
+                setTimeout(() => {
+                    c1.el.classList.remove('is-flipped');
+                    c2.el.classList.remove('is-flipped');
+                    m.flippedCards = [];
+                }, 900);
+            }
+        }
+    },
+
+    // TIER 3: TITAN RAID 2.0 COMBAT
+    castBossSpell(type) {
+        const r = this.raid;
+        if (r.hp <= 0) {
+            alert('The Titan is already defeated! Click refresh to respawn.');
+            return;
+        }
+
+        let dmg = 0;
+        let spellName = '';
+
+        if (type === 'slash') {
+            dmg = 50;
+            spellName = '⚔️ Code Slash';
+            sfx.bossHit();
+        } else if (type === 'fireball') {
+            dmg = 110;
+            spellName = '🔥 Recursion Blast';
+            sfx.bossHit();
+        } else if (type === 'lightning') {
+            dmg = 180;
+            spellName = '⚡ DP Lightning (CRITICAL)';
+            sfx.levelUp();
+        } else if (type === 'shield') {
+            r.shieldActive = true;
+            this.logCombat('[DEFENSE] Shield Barrier activated! Next boss attack will be absorbed.');
+            sfx.xpEarned();
+            return;
+        }
+
+        r.hp = Math.max(0, r.hp - dmg);
+        this.updateRaidHpDisplay();
+        this.triggerScreenShake();
+        this.showFloatingDamage(`-${dmg} HP!`, dmg >= 150);
+        this.logCombat(`[HERO HIT] Cast ${spellName} for ${dmg} damage to the Mid-Term Titan!`);
+
+        UI.addXP(Math.round(dmg / 3), `${spellName} on Titan`, '⚔️');
+
+        if (r.hp === 0) {
+            triggerConfetti();
+            sfx.levelUp();
+            this.logCombat('🏆 [VICTORY] Mid-Term Titan has been slain! +150 XP Victory Bonus!');
+            UI.addXP(150, 'Titan Slayer Grand Raid Bonus', '👑');
+        } else {
+            // Boss counter-attacks after 600ms
+            setTimeout(() => {
+                if (r.shieldActive) {
+                    this.logCombat('🛡️ [SHIELDED] Titan swung with Tail Swipe, but your Shield Barrier completely blocked the attack!');
+                    r.shieldActive = false;
+                } else {
+                    this.logCombat('⚠️ [TITAN COUNTER] Boss roared back with Mid-Term Anxiety Breath!');
+                    this.triggerScreenShake();
+                }
+            }, 600);
+        }
+    },
+
+    updateRaidHpDisplay() {
+        const r = this.raid;
+        const pct = Math.round((r.hp / r.maxHp) * 100);
+        document.getElementById('raidHpFill').style.width = `${pct}%`;
+        document.getElementById('raidHpText').textContent = `${r.hp} / ${r.maxHp} HP (${pct}%)`;
+    },
+
+    logCombat(msg) {
+        const box = document.getElementById('raidCombatLog');
+        if (!box) return;
+        const entry = document.createElement('div');
+        entry.textContent = msg;
+        box.prepend(entry);
+    },
+
+    triggerScreenShake() {
+        const arena = document.getElementById('bossArenaContainer');
+        if (arena) {
+            arena.classList.add('shake-active');
+            setTimeout(() => arena.classList.remove('shake-active'), 450);
+        }
+    },
+
+    showFloatingDamage(text, isCrit) {
+        const container = document.getElementById('damageNumberContainer');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = `floating-damage text-2xl sm:text-3xl ${isCrit ? 'text-yellow-400' : 'text-red-500'}`;
+        el.textContent = text;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+    },
+
+    // TIER 4: CYBER BUG HUNTER
+    initBugHunter() {
+        const bh = this.bugHunter;
+        if (bh.timerInterval) clearInterval(bh.timerInterval);
+        bh.timer = 15;
+        document.getElementById('bugBombTimer').textContent = '15s';
+
+        bh.activeSnippet = bh.snippets[Math.floor(Math.random() * bh.snippets.length)];
+        const container = document.getElementById('codeLinesContainer');
+        if (!container) return;
+
+        container.innerHTML = bh.activeSnippet.code.map((line, idx) => `
+            <div onclick="Arcade.checkBugLine(${idx})"
+                class="p-2.5 rounded-lg bg-slate-900 hover:bg-red-950/40 border border-slate-800 hover:border-red-500/50 cursor-pointer transition flex items-center justify-between group">
+                <span class="text-slate-300 font-mono text-xs group-hover:text-red-300">${line}</span>
+                <span class="text-[10px] text-slate-500 group-hover:text-red-400 font-bold uppercase">Click if Buggy &rarr;</span>
+            </div>
+        `).join('');
+
+        bh.timerInterval = setInterval(() => {
+            bh.timer--;
+            document.getElementById('bugBombTimer').textContent = `${bh.timer}s`;
+            if (bh.timer <= 0) {
+                clearInterval(bh.timerInterval);
+                sfx.wrongAnswer();
+                alert('💥 BOOM! The bomb detonated before the bug was identified. Try another round!');
+            }
+        }, 1000);
+    },
+
+    checkBugLine(idx) {
+        const bh = this.bugHunter;
+        if (bh.timerInterval) clearInterval(bh.timerInterval);
+
+        if (idx === bh.activeSnippet.bugLine) {
+            triggerConfetti();
+            sfx.levelUp();
+            alert(`🎉 BOMB DEFUSED! Great eye! Fix: ${bh.activeSnippet.fix} (+50 XP awarded!)`);
+            UI.addXP(50, 'Disarmed Critical Server Logic Bug', '💣');
+        } else {
+            sfx.wrongAnswer();
+            alert('❌ That line is mathematically valid! The timer runs out faster!');
+            bh.timer = Math.max(1, bh.timer - 5);
+        }
+    }
+};
+
 // Start application on page load
 window.addEventListener('DOMContentLoaded', () => {
     UI.init();
+    initCyberCanvas();
+    Arcade.init();
 });
+
