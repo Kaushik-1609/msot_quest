@@ -2,24 +2,25 @@
 // PIXEL GRID CURSOR TRAIL ANIMATION (Orange Plus-Shape Grid)
 // ==========================================================
 (function () {
-    const cv = document.getElementById('pixel-trail');
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    let CELL = 100, FADE = 0.018, W = 0, H = 0, dpr = 1;
-    const cells = new Map();
-    let last = null;
+    function initTrail() {
+        const cv = document.getElementById('pixel-trail');
+        if (!cv) return;
+        const ctx = cv.getContext('2d');
+        let CELL = 100, FADE = 0.018, W = 0, H = 0, dpr = 1;
+        const cells = new Map();
+        let last = null;
 
-    function resize() {
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        W = window.innerWidth;
-        H = window.innerHeight;
-        cv.width = W * dpr;
-        cv.height = H * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        CELL = W < 600 ? 60 : 100;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+        function resize() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = window.innerWidth;
+            H = window.innerHeight;
+            cv.width = W * dpr;
+            cv.height = H * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            CELL = W < 600 ? 60 : 100;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
     function light(cx, cy, v) {
         const k = cx + ',' + cy;
@@ -86,4 +87,11 @@
         requestAnimationFrame(frame);
     }
     frame();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTrail);
+} else {
+    initTrail();
+}
 })();

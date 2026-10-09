@@ -149,7 +149,7 @@ code, .font-mono {
 }
 
 /* ==========================================================
-   CINEMATIC TORII HERO GATE (CHEERY-ZUCCUTTO REFERENCE)
+   CINEMATIC TORII HERO GATE (OPTIONAL MODAL VIEW)
    ========================================================== */
 #heroGateOverlay {
     position: fixed;
@@ -157,17 +157,24 @@ code, .font-mono {
     z-index: 1000;
     background: #04060c;
     overflow: hidden;
-    display: flex;
+    display: none !important; /* Hidden by default - Never blocks the app */
     align-items: center;
     justify-content: center;
-    transition: opacity 0.7s cubic-bezier(0.85, 0, 0.15, 1) 0.7s, visibility 0.7s ease 0.7s;
     perspective: 1200px;
 }
 
+#heroGateOverlay.active-gate {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
 #heroGateOverlay.gate-opened {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: none !important;
 }
 
 /* Torii Stage & kasagi roof */

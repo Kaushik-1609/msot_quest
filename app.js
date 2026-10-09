@@ -726,7 +726,7 @@ const UI = {
         }
     },
 
-    enterGates(event) {
+    enterGate(event) {
         if (event) {
             try { event.preventDefault(); event.stopPropagation(); } catch (e) {}
         }
@@ -746,6 +746,10 @@ const UI = {
                 gateOverlay.style.display = 'none';
             }, 850);
         }
+    },
+
+    enterGates(event) {
+        this.enterGate(event);
     },
 
     showHeroGate() {
@@ -1569,6 +1573,13 @@ const CodeFighter = {
         this.init();
     }
 };
+
+// Global Access Handlers
+window.UI = UI;
+window.Arcade = Arcade;
+window.CodeFighter = CodeFighter;
+window.enterGate = (e) => UI.enterGate(e);
+window.openGateAndEnterArcade = (e) => UI.enterGate(e);
 
 // Start application on page load
 window.addEventListener('DOMContentLoaded', () => {
