@@ -3,11 +3,11 @@
 // ================================================================
 
 const CONFIG = {
-    // Paste your Supabase Project URL here:
-    SUPABASE_URL: "https://xyzexample.supabase.co",
+    // Linked Supabase Project URL
+    SUPABASE_URL: "https://totwhntfszsbgcvbutpc.supabase.co",
 
-    // Paste your Supabase Public Anon Key here:
-    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    // Linked Supabase Public Publishable / Anon Key
+    SUPABASE_ANON_KEY: "sb_publishable_FOOsqOAgTTcTqPqL0Kf9Vw_GyglxClR",
 
     // Platform settings
     COLLEGE_NAME: "MSOT (Modern School of Tech)",
