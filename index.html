@@ -28,48 +28,124 @@
     <link rel="stylesheet" href="styles.css">
     <!-- Config & App Script -->
     <script src="config.js"></script>
+    <script src="pixel-trail.js" defer></script>
     <script src="app.js" defer></script>
 </head>
-<body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16 relative">
+<body class="bg-[#060913] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16 relative">
+
+    <!-- Blackbox.ai Style Interactive Cursor Glow Spotlight -->
+    <div id="cursorGlow"></div>
+
+    <!-- Pixel Grid Cursor Trail Canvas (Orange Plus Shape Fade Grid) -->
+    <canvas id="pixel-trail" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
+
+    <!-- Anime Speedlines Flash Overlay -->
+    <div class="anime-speedlines-overlay" id="animeSpeedlines"></div>
 
     <!-- Interactive Background Particle Cyber Canvas -->
     <canvas id="cyberCanvas"></canvas>
 
-    <!-- DRAMATIC HERO GATE EXPERIENCE (MATCHING REFERENCE SITE) -->
-    <div id="heroGateOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#07090f] overflow-hidden transition-all duration-1000">
+    <!-- ===================================================================
+         CINEMATIC 3D TORII HERO GATE (CHEERY-ZUCCUTTO REFERENCE)
+         =================================================================== -->
+    <div id="heroGateOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#04060c] overflow-hidden transition-all duration-1000">
         <div class="gate-fire-glow"></div>
-        <div class="gate-door-left flex flex-col justify-between p-8 border-r-2 border-red-500/40 shadow-2xl">
-            <div class="text-xs font-mono text-red-500/70 tracking-widest uppercase">未来工科大学 • MSOT PROTOCOL 01</div>
-            <div class="text-3xl sm:text-5xl font-black text-red-500/10 font-cinzel rotate-90 origin-left select-none">CODE GATE</div>
-            <div class="text-xs font-mono text-slate-500">GATE ARCHIVE • FALL 2026</div>
-        </div>
-        <div class="gate-door-right flex flex-col justify-between p-8 border-l-2 border-red-500/40 shadow-2xl text-right">
-            <div class="text-xs font-mono text-red-500/70 tracking-widest uppercase">CRUCIBLE OF CODERS</div>
-            <div class="text-3xl sm:text-5xl font-black text-red-500/10 font-cinzel -rotate-90 origin-right select-none">MSOT QUEST</div>
-            <div class="text-xs font-mono text-slate-500">ALL BUGS SHALL PERISH</div>
+
+        <!-- 3D Massive Anime Torii Architecture -->
+        <div class="hero-torii-stage">
+            <!-- Curved Kasagi Roof & Center Golden Plaque -->
+            <div class="hero-torii-roof">
+                <div class="hero-torii-plaque">
+                    <span class="h-plaque-kanji">鳥居 MSOT</span>
+                </div>
+            </div>
+
+            <!-- Flanking Giant Torii Pillars with Glowing Runes -->
+            <div class="hero-torii-pillar left">
+                <div class="h-pillar-kanji">
+                    <span>極</span>
+                    <span>意</span>
+                    <span>門</span>
+                </div>
+            </div>
+            <div class="hero-torii-pillar right">
+                <div class="h-pillar-kanji">
+                    <span>試</span>
+                    <span>練</span>
+                    <span>場</span>
+                </div>
+            </div>
+
+            <!-- 3D Perspective Outward-Opening Doors -->
+            <div class="hero-doors-3d-stage">
+                <!-- Glowing Center Seam Energy Burst -->
+                <div class="hero-door-seam-burst"></div>
+
+                <!-- Center Mystic Astral Seal -->
+                <div class="hero-seam-seal">
+                    <div class="text-center">
+                        <span class="text-amber-400 text-xs block">✦</span>
+                        <span class="seal-kanji">極意</span>
+                        <span class="text-amber-400 text-xs block">✦</span>
+                    </div>
+                </div>
+
+                <!-- 3D Left Torii Door -->
+                <div class="hero-anime-door door-left flex flex-col justify-between p-12 border-r-2 border-amber-500/50 shadow-2xl">
+                    <div class="text-xs font-mono text-red-500 tracking-widest uppercase">未来工科大学 • PROTOCOL 01</div>
+                    <div class="text-4xl sm:text-6xl font-black text-amber-500/10 font-cinzel rotate-90 origin-left select-none">CODE CRUCIBLE</div>
+                    <div class="text-xs font-mono text-slate-500">GATE ARCHIVE • 2026</div>
+                </div>
+
+                <!-- 3D Right Torii Door -->
+                <div class="hero-anime-door door-right flex flex-col justify-between p-12 border-l-2 border-amber-500/50 shadow-2xl text-right">
+                    <div class="text-xs font-mono text-red-500 tracking-widest uppercase">1V1 CODE COMBAT</div>
+                    <div class="text-4xl sm:text-6xl font-black text-amber-500/10 font-cinzel -rotate-90 origin-right select-none">MSOT QUEST</div>
+                    <div class="text-xs font-mono text-slate-500">ABANDON ALL BUGS</div>
+                </div>
+            </div>
         </div>
 
         <!-- Center Gate Content Layer -->
-        <div class="relative z-20 text-center max-w-2xl px-6 space-y-6">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-xs font-mono text-red-400 font-bold tracking-wider">
+        <div class="relative z-30 text-center max-w-3xl px-6 space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/40 text-xs font-mono text-amber-400 font-bold tracking-wider">
                 <span>⛩️ RELIC 01 • THE GATES OF MSOT</span>
             </div>
             
             <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight font-cinzel leading-none drop-shadow-2xl">
                 Abandon All Bugs,<br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-amber-300">Ye Who Enter Here.</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-orange-300">Ye Who Enter Here.</span>
             </h1>
-            
-            <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg mx-auto">
-                Towering gates part in red smoke and firelight — a crucible for coders who want to be remembered. Enter to experience 1v1 Street Fighter Code Duels, boss raids, and daily trials.
-            </p>
 
-            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button onclick="UI.enterGates()" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:to-orange-500 text-white font-black text-sm uppercase tracking-wider shadow-2xl shadow-red-600/50 transform hover:scale-105 transition flex items-center justify-center gap-2">
-                    <span>⚡ ENTER THE GATES / 開門 ➔</span>
+            <!-- Sacred Codex Quote Scroll Card (Matching Reference Site) -->
+            <div class="hero-quote-scroll-card max-w-2xl mx-auto">
+                <div class="text-[11px] font-mono text-amber-400 font-bold tracking-widest mb-1 uppercase">❖ SACRED CODEX // 聖典 ❖</div>
+                <div class="quote-pillars-row">
+                    <div class="quote-pill">
+                        <div class="pill-glow-tag gold">POWER</div>
+                        <div class="pill-text-line">Every skill is a power.</div>
+                    </div>
+                    <div class="text-amber-400 font-bold">✦</div>
+                    <div class="quote-pill">
+                        <div class="pill-glow-tag crimson">QUEST</div>
+                        <div class="pill-text-line">Every challenge is a quest.</div>
+                    </div>
+                    <div class="text-amber-400 font-bold">✦</div>
+                    <div class="quote-pill">
+                        <div class="pill-glow-tag violet">EVOLVE</div>
+                        <div class="pill-text-line">Every day, become stronger.</div>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 mt-2 italic">&ldquo;Master 1v1 Street Fighter Code Battles, 4 Arcade Tiers, Daily Syllabus Quizzes, and Boss Raids.&rdquo;</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="UI.enterGates(event)" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-red-600 via-orange-600 to-amber-500 hover:from-red-500 hover:to-orange-500 text-slate-950 font-black text-sm uppercase tracking-widest shadow-2xl shadow-red-600/50 transform hover:scale-105 transition flex items-center justify-center gap-2">
+                    <span>⚡ [ ENTER THE GAME WORLD ] / 開門 ➔</span>
                 </button>
-                <button onclick="UI.enterGates(); UI.switchTab('fight');" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2">
-                    <span>🥊 Jump Straight to 1v1 Fight</span>
+                <button onclick="UI.enterGates(event); UI.switchTab('fight');" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-rose-300 font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2">
+                    <span>🥊 Jump Directly to 1v1 Punch Duel</span>
                 </button>
             </div>
         </div>

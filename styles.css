@@ -2,7 +2,7 @@
    MSOT QUEST - GAMIFIED LEARNING PLATFORM ADVANCED STYLES
    ========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@700;900&family=Cinzel:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@700;900&family=Cinzel:wght@700;900&family=Noto+Serif+JP:wght@700;900&display=swap');
 
 :root {
     --primary: #4f46e5;
@@ -12,6 +12,8 @@
     --emerald: #10b981;
     --cyan: #06b6d4;
     --magenta: #d946ef;
+    --cursor-x: 50vw;
+    --cursor-y: 50vh;
 }
 
 body {
@@ -19,6 +21,7 @@ body {
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     position: relative;
+    background-color: #060913;
 }
 
 .font-game {
@@ -27,6 +30,10 @@ body {
 
 .font-cinzel {
     font-family: 'Cinzel', serif;
+}
+
+.font-jp {
+    font-family: 'Noto Serif JP', serif;
 }
 
 code, .font-mono {
@@ -49,6 +56,46 @@ code, .font-mono {
     background: #6366f1;
 }
 
+/* ==========================================================
+   BLACKBOX.AI STYLE INTERACTIVE CURSOR SPOTLIGHT & ILLUMINATION
+   ========================================================== */
+#cursorGlow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 650px;
+    height: 650px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.14) 0%, rgba(236, 72, 153, 0.08) 35%, transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    mix-blend-mode: screen;
+}
+
+/* Blackbox.ai Card Spotlight illumination */
+.glass-panel, .glass-card, .neon-inner {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-panel::before, .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: radial-gradient(500px circle at var(--mouse-x, -500px) var(--mouse-y, -500px), rgba(99, 102, 241, 0.22), transparent 70%);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.glass-panel:hover::before, .glass-card:hover::before {
+    opacity: 1;
+}
+
 /* Animated Cyber Grid Canvas Background */
 #cyberCanvas {
     position: fixed;
@@ -58,7 +105,260 @@ code, .font-mono {
     height: 100vh;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.35;
+    opacity: 0.45;
+}
+
+/* ==========================================================
+   ANIME SPEEDLINES FLASH OVERLAY (MATCHING REFERENCE SITE)
+   ========================================================== */
+.anime-speedlines-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(255, 42, 75, 0.25) 80%, rgba(255, 20, 50, 0.8) 100%);
+    transition: opacity 0.3s ease;
+}
+
+.anime-speedlines-overlay.active {
+    opacity: 1;
+    animation: speedlinesBurst 0.6s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+@keyframes speedlinesBurst {
+    0% { transform: scale(1.4); opacity: 0; filter: brightness(2); }
+    30% { transform: scale(1); opacity: 1; filter: brightness(1.5); }
+    100% { transform: scale(0.95); opacity: 0; filter: brightness(1); }
+}
+
+/* ==========================================================
+   CINEMATIC TORII HERO GATE (CHEERY-ZUCCUTTO REFERENCE)
+   ========================================================== */
+#heroGateOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #04060c;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.9s cubic-bezier(0.85, 0, 0.15, 1), visibility 0.9s;
+    perspective: 1200px;
+}
+
+#heroGateOverlay.gate-opened {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Torii Stage & kasagi roof */
+.hero-torii-stage {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hero-torii-roof {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 90px;
+    background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 60%, #450a0a 100%);
+    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
+    border-bottom: 4px solid #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+}
+
+.hero-torii-plaque {
+    background: #090d16;
+    border: 2px solid #f59e0b;
+    padding: 6px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+    text-align: center;
+    transform: translateY(18px);
+}
+
+.h-plaque-kanji {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: #f59e0b;
+    letter-spacing: 4px;
+}
+
+/* Flanking Giant Torii Pillars */
+.hero-torii-pillar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 65px;
+    background: linear-gradient(90deg, #7f1d1d 0%, #b91c1c 50%, #450a0a 100%);
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.4);
+    z-index: 22;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+}
+
+.hero-torii-pillar.left { left: 0; border-right: 2px solid #f59e0b; }
+.hero-torii-pillar.right { right: 0; border-left: 2px solid #f59e0b; }
+
+.h-pillar-kanji {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #fef08a;
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.9);
+    writing-mode: vertical-rl;
+    letter-spacing: 12px;
+}
+
+/* 3D Rotating Gate Doors */
+.hero-doors-3d-stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    perspective: 1400px;
+    z-index: 10;
+}
+
+.hero-anime-door {
+    width: 50vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #111524 0%, #080a12 100%);
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.95);
+    transition: transform 1.3s cubic-bezier(0.7, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-anime-door.door-left {
+    transform-origin: left center;
+    border-right: 2px solid rgba(245, 158, 11, 0.6);
+}
+
+.hero-anime-door.door-right {
+    transform-origin: right center;
+    border-left: 2px solid rgba(245, 158, 11, 0.6);
+}
+
+/* Door Opened 3D Swing Outward */
+.gate-opened .hero-anime-door.door-left {
+    transform: rotateY(-110deg) scale(0.9);
+}
+
+.gate-opened .hero-anime-door.door-right {
+    transform: rotateY(110deg) scale(0.9);
+}
+
+/* Center Mystic Astral Seal */
+.hero-seam-seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #090d16;
+    border: 3px solid #f59e0b;
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.7), inset 0 0 20px rgba(245, 158, 11, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    transition: transform 0.6s ease, opacity 0.5s ease;
+}
+
+.gate-opened .hero-seam-seal {
+    transform: translate(-50%, -50%) scale(2.2);
+    opacity: 0;
+}
+
+.seal-kanji {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #fef08a;
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.9);
+}
+
+/* Center Seam Energy Burst */
+.hero-door-seam-burst {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, transparent 0%, #f59e0b 30%, #ef4444 70%, transparent 100%);
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.9);
+    z-index: 28;
+    pointer-events: none;
+}
+
+.gate-opened .hero-door-seam-burst {
+    opacity: 0;
+}
+
+/* Sacred Codex Quote Scroll Card */
+.hero-quote-scroll-card {
+    background: rgba(13, 19, 34, 0.85);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(239, 68, 68, 0.15);
+    backdrop-filter: blur(14px);
+    position: relative;
+}
+
+.quote-pillars-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+}
+
+.quote-pill {
+    background: rgba(20, 27, 45, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px 14px;
+    text-align: left;
+}
+
+.pill-glow-tag {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+}
+
+.pill-glow-tag.gold { color: #f59e0b; }
+.pill-glow-tag.crimson { color: #ef4444; }
+.pill-glow-tag.violet { color: #a855f7; }
+
+.pill-text-line {
+    font-size: 11px;
+    color: #e2e8f0;
+    font-weight: 600;
 }
 
 /* Screen Shake Effect */
@@ -186,70 +486,8 @@ code, .font-mono {
 }
 
 /* ==========================================================
-   CINEMATIC HERO GATE MODAL & HEAVY DOORS
-   ========================================================== */
-#heroGateOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: #050508;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.8s cubic-bezier(0.85, 0, 0.15, 1), visibility 0.8s;
-}
-
-#heroGateOverlay.gate-opened {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.gate-door-left, .gate-door-right {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 50vw;
-    background: linear-gradient(135deg, #111420 0%, #080a10 100%);
-    border-right: 2px solid rgba(239, 68, 68, 0.4);
-    transition: transform 1.2s cubic-bezier(0.7, 0, 0.2, 1);
-    z-index: 10;
-    overflow: hidden;
-    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
-}
-
-.gate-door-left {
-    left: 0;
-}
-
-.gate-door-right {
-    right: 0;
-    border-left: 2px solid rgba(239, 68, 68, 0.4);
-    border-right: none;
-}
-
-.gate-opened .gate-door-left {
-    transform: translateX(-100%);
-}
-
-.gate-opened .gate-door-right {
-    transform: translateX(100%);
-}
-
-/* Fire Backdrop behind the gates */
-.gate-fire-glow {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(239, 68, 68, 0.25) 0%, rgba(249, 115, 22, 0.1) 40%, transparent 70%);
-    pointer-events: none;
-}
-
-/* ==========================================================
    2-PERSON 1V1 CODE FIGHTER ANIMATIONS
    ========================================================== */
-
-/* Player 1 Idle Stance (Facing Right) */
 @keyframes fighterIdlePlayer {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-8px) scale(1.03); }
@@ -259,7 +497,6 @@ code, .font-mono {
     animation: fighterIdlePlayer 2s ease-in-out infinite;
 }
 
-/* Rival Idle Stance (Facing Left) */
 @keyframes fighterIdleRival {
     0%, 100% { transform: translateY(0) scaleX(-1); }
     50% { transform: translateY(-8px) scaleX(-1) scaleY(1.03); }
@@ -269,7 +506,6 @@ code, .font-mono {
     animation: fighterIdleRival 2s ease-in-out infinite;
 }
 
-/* Player Punch Forward Dash Animation */
 @keyframes playerPunchDash {
     0% { transform: translateX(0) scale(1); }
     35% { transform: translateX(140px) scale(1.2) rotate(6deg); }
@@ -282,7 +518,6 @@ code, .font-mono {
     animation: playerPunchDash 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Rival Punch Forward Dash Animation */
 @keyframes rivalPunchDash {
     0% { transform: translateX(0) scaleX(-1); }
     35% { transform: translateX(-140px) scaleX(-1) scale(1.2) rotate(-6deg); }
@@ -295,7 +530,6 @@ code, .font-mono {
     animation: rivalPunchDash 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Player Hurt Recoil */
 @keyframes playerHurtAnim {
     0% { transform: translateX(0); filter: brightness(1); }
     20% { transform: translateX(-35px) rotate(-15deg); filter: brightness(2.5) drop-shadow(0 0 25px #ef4444); }
@@ -307,7 +541,6 @@ code, .font-mono {
     animation: playerHurtAnim 0.5s ease-out;
 }
 
-/* Rival Hurt Recoil */
 @keyframes rivalHurtAnim {
     0% { transform: scaleX(-1); filter: brightness(1); }
     20% { transform: scaleX(-1) translateX(35px) rotate(15deg); filter: brightness(2.5) drop-shadow(0 0 25px #ef4444); }
@@ -319,7 +552,6 @@ code, .font-mono {
     animation: rivalHurtAnim 0.5s ease-out;
 }
 
-/* Hit Spark Explosion */
 @keyframes hitSparkBurst {
     0% { transform: scale(0.2) rotate(0deg); opacity: 1; }
     50% { transform: scale(1.8) rotate(45deg); opacity: 1; }
@@ -337,7 +569,6 @@ code, .font-mono {
     animation: hitSparkBurst 0.45s ease-out forwards;
 }
 
-/* K.O. Announcement Drop */
 @keyframes koBannerDrop {
     0% { transform: scale(3.5) rotate(-20deg); opacity: 0; }
     40% { transform: scale(0.85) rotate(3deg); opacity: 1; }

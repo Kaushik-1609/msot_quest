@@ -726,8 +726,14 @@ const UI = {
         }
     },
 
-    enterGates() {
+    enterGates(event) {
         sfx.gateOpen();
+        const speedlines = document.getElementById('animeSpeedlines');
+        if (speedlines) {
+            speedlines.classList.add('active');
+            setTimeout(() => speedlines.classList.remove('active'), 750);
+        }
+        triggerConfetti();
         const gateOverlay = document.getElementById('heroGateOverlay');
         if (gateOverlay) {
             gateOverlay.classList.add('gate-opened');
