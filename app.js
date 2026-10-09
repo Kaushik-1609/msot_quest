@@ -696,6 +696,111 @@ const UI = {
                 btn.classList.add('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60');
             });
         });
+    },
+
+    toggleAuthMode(mode) {
+        const isSignIn = mode === 'signin';
+        document.getElementById('signInForm').classList.toggle('hidden', !isSignIn);
+        document.getElementById('signUpForm').classList.toggle('hidden', isSignIn);
+
+        const tabIn = document.getElementById('tabAuthSignIn');
+        const tabUp = document.getElementById('tabAuthSignUp');
+        if (isSignIn) {
+            tabIn.className = "flex-1 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition";
+            tabUp.className = "flex-1 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition";
+        } else {
+            tabUp.className = "flex-1 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition";
+            tabIn.className = "flex-1 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition";
+        }
+    },
+
+    async handleSupabaseAuth(event, mode) {
+        event.preventDefault();
+        const banner = document.getElementById('authStatusBanner');
+        banner.className = "mb-4 p-3 rounded-xl text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/30";
+        banner.textContent = mode === 'signup' ? "Creating account in Supabase..." : "Signing in with Supabase...";
+        banner.classList.remove('hidden');
+
+        let client = null;
+        if (typeof supabase !== 'undefined' && isSupabaseLive()) {
+            client = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        }
+
+        if (mode === 'signup') {
+            const name = document.getElementById('signUpName').value.trim();
+            const roll = document.getElementById('signUpRoll').value.trim();
+            const dept = document.getElementById('signUpDept').value;
+            const email = document.getElementById('signUpEmail').value.trim();
+            const password = document.getElementById('signUpPassword').value;
+
+            try {
+                if (client) {
+                    // 1. Supabase Auth Signup
+                    const { data: authData, error: authErr } = await client.auth.signUp({
+                        email: email,
+                        password: password
+                    });
+                    if (authErr) throw authErr;
+
+                    // 2. Insert into profiles table
+                    const { error: profileErr } = await client.from('profiles').insert([{
+                        email: email,
+                        full_name: name,
+                        roll_no: roll,
+                        department: dept,
+                        xp: 100,
+                        level: 1,
+                        streak_days: 1
+                    }]);
+                    if (profileErr) console.warn("Profile table insert notice:", profileErr);
+                }
+
+                // Update active state in UI
+                AppState.student.name = name;
+                AppState.student.rollNo = roll;
+                AppState.student.department = dept;
+                this.renderAll();
+                sfx.xpEarned();
+                triggerConfetti();
+
+                banner.className = "mb-4 p-3 rounded-xl text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30";
+                banner.textContent = `✅ Account created! Welcome ${name}. Check your Supabase Dashboard now.`;
+                setTimeout(() => {
+                    document.getElementById('authModal').classList.add('hidden');
+                    banner.classList.add('hidden');
+                }, 1800);
+
+            } catch (err) {
+                console.error(err);
+                banner.className = "mb-4 p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-300 border border-red-500/30";
+                banner.textContent = `Notice: ${err.message || 'Could not connect to Supabase'}`;
+            }
+        } else {
+            // Sign In
+            const email = document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signInPassword').value;
+
+            try {
+                if (client) {
+                    const { data, error } = await client.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    if (error) throw error;
+                }
+
+                banner.className = "mb-4 p-3 rounded-xl text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30";
+                banner.textContent = "✅ Signed in successfully!";
+                setTimeout(() => {
+                    document.getElementById('authModal').classList.add('hidden');
+                    banner.classList.add('hidden');
+                }, 1200);
+            } catch (err) {
+                console.error(err);
+                banner.className = "mb-4 p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-300 border border-red-500/30";
+                banner.textContent = `Sign in notice: ${err.message || 'Invalid credentials'}`;
+            }
+        }
     }
 };
 
