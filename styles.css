@@ -250,6 +250,7 @@ code, .font-mono {
     display: flex;
     perspective: 1400px;
     z-index: 10;
+    pointer-events: none !important;
 }
 
 .hero-anime-door {
@@ -260,6 +261,7 @@ code, .font-mono {
     transition: transform 1.3s cubic-bezier(0.7, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    pointer-events: none !important;
 }
 
 .hero-anime-door.door-left {
@@ -296,7 +298,8 @@ code, .font-mono {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 30;
+    z-index: 15;
+    pointer-events: none !important;
     transition: transform 0.6s ease, opacity 0.5s ease;
 }
 

@@ -727,23 +727,34 @@ const UI = {
     },
 
     enterGates(event) {
-        sfx.gateOpen();
+        if (event) {
+            try { event.preventDefault(); event.stopPropagation(); } catch (e) {}
+        }
+        try { sfx.gateOpen(); } catch (e) {}
+
         const speedlines = document.getElementById('animeSpeedlines');
         if (speedlines) {
             speedlines.classList.add('active');
             setTimeout(() => speedlines.classList.remove('active'), 750);
         }
-        triggerConfetti();
+        try { triggerConfetti(); } catch (e) {}
+
         const gateOverlay = document.getElementById('heroGateOverlay');
         if (gateOverlay) {
             gateOverlay.classList.add('gate-opened');
+            setTimeout(() => {
+                gateOverlay.style.display = 'none';
+            }, 850);
         }
     },
 
     showHeroGate() {
         const gateOverlay = document.getElementById('heroGateOverlay');
         if (gateOverlay) {
-            gateOverlay.classList.remove('gate-opened');
+            gateOverlay.style.display = 'flex';
+            setTimeout(() => {
+                gateOverlay.classList.remove('gate-opened');
+            }, 50);
         }
     },
 
