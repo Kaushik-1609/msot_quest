@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSOT Quest | Gamified Learning Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#090d16',
+                        darkcard: '#111827',
+                        accent: '#6366f1',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Canvas Confetti for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Config & App Script -->
+    <script src="config.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        <!-- Logo & College Brand -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-indigo-500/30">
+                ⚡
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">MSOT QUEST</span>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">v2.0 HACKATHON EDITION</span>
+                </div>
+                <p class="text-xs text-slate-400">Gamified Daily Learning Ecosystem</p>
+            </div>
+        </div>
+
+        <!-- Student Quick Stats Bar -->
+        <div class="flex items-center gap-4 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-800">
+            <!-- Level -->
+            <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold text-xs border border-indigo-500/30">LVL</span>
+                <span class="font-bold text-sm text-indigo-300" id="headerLevel">4</span>
+            </div>
+
+            <div class="h-4 w-px bg-slate-800"></div>
+
+            <!-- Total XP -->
+            <div class="flex items-center gap-1.5">
+                <span class="text-amber-400 text-sm">✨</span>
+                <span class="font-bold font-mono text-sm text-amber-300" id="headerXP">780</span>
+                <span class="text-[11px] text-slate-400">XP</span>
+            </div>
+
+            <div class="h-4 w-px bg-slate-800"></div>
+
+            <!-- Streak Counter with Fire Animation -->
+            <div class="flex items-center gap-1.5 cursor-pointer" title="Daily Streak Active!">
+                <span class="flame-active text-lg">🔥</span>
+                <span class="font-bold font-mono text-sm text-orange-400" id="headerStreak">6</span>
+                <span class="text-[11px] text-slate-400">Days</span>
+            </div>
+
+            <div class="h-4 w-px bg-slate-800"></div>
+
+            <!-- Streak Freezes -->
+            <div class="flex items-center gap-1.5 cursor-pointer" onclick="UI.useStreakFreeze()" title="Click to use a Streak Freeze Shield">
+                <span class="text-sm">🛡️</span>
+                <span class="font-bold font-mono text-xs text-sky-400" id="headerFreezes">2</span>
+                <span class="text-[10px] text-slate-400 uppercase font-semibold">Freeze</span>
+            </div>
+        </div>
+
+        <!-- Right Controls: Role Switcher & Profile -->
+        <div class="flex items-center gap-3">
+            <!-- Sound Toggle -->
+            <button onclick="sfx.enabled = !sfx.enabled; this.textContent = sfx.enabled ? '🔊' : '🔇';" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-sm" title="Toggle Sound FX">
+                🔊
+            </button>
+
+            <!-- Role Switcher (Student vs Faculty) -->
+            <div class="bg-slate-900 p-1 rounded-xl border border-slate-800 flex items-center">
+                <button id="roleBtnStudent" onclick="UI.switchRole('student')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">
+                    👨‍🎓 Student
+                </button>
+                <button id="roleBtnFaculty" onclick="UI.switchRole('faculty')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+                    👨‍🏫 Faculty
+                </button>
+            </div>
+
+            <!-- Auth Login Modal Trigger -->
+            <button onclick="document.getElementById('authModal').classList.remove('hidden')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-xl text-slate-200 transition">
+                🔑 Auth
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: STUDENT GAMIFIED LEARNING PORTAL   -->
+        <!-- ========================================== -->
+        <div id="studentPortalView" class="space-y-6">
+
+            <!-- Hero Banner & XP Progress -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/70 to-slate-900 border border-indigo-500/20 p-6 md:p-8">
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-xs font-semibold">
+                                🎓 Computer Science & Engineering
+                            </span>
+                            <span class="text-xs text-slate-400 font-mono">MSOT Main Campus • Section A</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Welcome Back, <span id="studentNameBadge" class="text-indigo-300">Rahul Sharma</span>!
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            Roll No: <span id="studentRollBadge" class="font-mono text-slate-300">2024CSE104</span> • You are in the <strong class="text-amber-400">Promotion Zone</strong> of Silver League!
+                        </p>
+                    </div>
+
+                    <!-- Verified LeetCode & Codeforces Sync Simulator -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <button onclick="UI.simulateLeetCodeSync()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition hover:border-amber-500/50">
+                            <span class="text-amber-400">⚡</span>
+                            <span>Sync LeetCode (+20 XP)</span>
+                        </button>
+                        <button onclick="UI.toggleAnonymous()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 flex items-center justify-center gap-2 transition">
+                            <span>🕶️ Toggle Anonymous</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- XP Progress Bar to Next Level -->
+                <div class="mt-6 pt-6 border-t border-slate-800/80 space-y-2">
+                    <div class="flex justify-between text-xs font-semibold">
+                        <span class="text-slate-300">Level 4 Scholar</span>
+                        <span id="xpNextLevelText" class="font-mono text-indigo-400">30 / 250 XP to Level 5</span>
+                    </div>
+                    <div class="w-full bg-slate-950/80 h-3 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                        <div id="xpProgressFill" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-700" style="width: 25%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+                <button data-tab="overview" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-bold border border-indigo-500 text-indigo-400 bg-slate-800/60 transition flex items-center gap-2">
+                    <span>🏰 Hub & Quests</span>
+                </button>
+                <button data-tab="quiz" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
+                    <span>📝 Daily Syllabus Quiz</span>
+                    <span class="bg-indigo-500 text-white text-[10px] px-1.5 py-0.2 rounded font-bold">NEW</span>
+                </button>
+                <button data-tab="boss" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
+                    <span>🐉 Mid-Term Boss Battle</span>
+                    <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded font-bold animate-pulse">LIVE</span>
+                </button>
+                <button data-tab="leagues" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
+                    <span>🏆 Weekly Leagues (~20 Peers)</span>
+                </button>
+                <button data-tab="teambattle" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
+                    <span>⚔️ Section Battles</span>
+                </button>
+                <button data-tab="store" class="tab-nav-btn px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white border border-transparent hover:border-slate-800 transition flex items-center gap-2">
+                    <span>🛍️ Rewards Store</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: HUB & QUESTS -->
+            <div id="tab_overview" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left 2 Cols: Badges & Quests -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <span>🎯 Active Quests & Milestone Badges</span>
+                                </h3>
+                                <p class="text-xs text-slate-400">Complete tasks to unlock XP and exclusive MSOT badges</p>
+                            </div>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg font-mono">4 Total</span>
+                        </div>
+                        <div id="questsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Populated via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Learning Actions (Learning First Principle) -->
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                        <h3 class="text-base font-bold text-white mb-1">⚡ Quick Verified Learning Actions</h3>
+                        <p class="text-xs text-slate-400 mb-4">Points only earned for verified academic actions (Strict No-Idle clicks policy)</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="UI.addXP(10, 'Attended Lecture (QR Verified)', '🎓'); sfx.xpEarned();" 
+                                class="p-3.5 bg-slate-900/70 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500 rounded-xl text-left transition">
+                                <span class="text-2xl block mb-1">🎓</span>
+                                <h5 class="text-xs font-bold text-slate-200">Attend Class</h5>
+                                <span class="text-[11px] text-emerald-400 font-mono font-bold">+10 XP</span>
+                            </button>
+
+                            <button onclick="UI.addXP(20, 'Homework Submitted on Time', '📚'); sfx.xpEarned();" 
+                                class="p-3.5 bg-slate-900/70 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500 rounded-xl text-left transition">
+                                <span class="text-2xl block mb-1">📚</span>
+                                <h5 class="text-xs font-bold text-slate-200">Submit Homework</h5>
+                                <span class="text-[11px] text-emerald-400 font-mono font-bold">+20 XP</span>
+                            </button>
+
+                            <button onclick="UI.addXP(25, 'Attended Coding Club Workshop', '💡'); sfx.xpEarned();" 
+                                class="p-3.5 bg-slate-900/70 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500 rounded-xl text-left transition">
+                                <span class="text-2xl block mb-1">💡</span>
+                                <h5 class="text-xs font-bold text-slate-200">Club Activity</h5>
+                                <span class="text-[11px] text-emerald-400 font-mono font-bold">+25 XP</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Col: XP Audit Trail Ledger (Must-Have #1) -->
+                <div class="space-y-6">
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-white">📜 XP Audit History</h3>
+                                <p class="text-xs text-slate-400">Verifiable ledger of every point earned</p>
+                            </div>
+                        </div>
+                        <div id="ledgerList" class="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: DAILY SYLLABUS QUIZ & AI STUDY BUDDY -->
+            <div id="tab_quiz" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6 md:p-8 rounded-2xl border border-slate-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800">
+                        <div>
+                            <span class="text-xs font-bold font-mono text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+                                TODAY'S MICRO-CHALLENGE
+                            </span>
+                            <h3 class="text-xl font-bold text-white mt-2">Week 4 Syllabus: Trees, BST & Graph Traversals</h3>
+                            <p class="text-xs text-slate-400 mt-1">Faculty Approved: CS301 Algorithms Course • Earn +15 Base XP + 5 XP per correct answer</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400">Anti-Gaming Protected</span>
+                            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
+                                Rate-Limit: 1/day
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Daily Quiz Questions Container -->
+                    <div id="dailyQuizQuestions" class="space-y-6">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: BOSS BATTLE (MID-TERM TITAN) -->
+            <div id="tab_boss" class="tab-content hidden space-y-6">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-red-950/40 to-slate-900 border border-red-500/30 p-6 md:p-10 text-center">
+                    <div class="max-w-2xl mx-auto space-y-4">
+                        <span class="text-xs font-bold tracking-widest text-red-400 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/30">
+                            🔥 CO-OP BOSS RAID CHALLENGE
+                        </span>
+                        
+                        <div id="bossAvatar" class="boss-float text-7xl sm:text-8xl my-4 select-none">
+                            🐉
+                        </div>
+
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">The Mid-Term Dragon</h3>
+                        <p class="text-xs sm:text-sm text-slate-300">
+                            Timed revision challenge a week before MSOT mid-term exams! Each correct conceptual answer strikes the boss and drops HP for the entire section.
+                        </p>
+
+                        <!-- Boss Health Bar -->
+                        <div class="space-y-1.5 pt-4">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-red-400">Boss Integrity</span>
+                                <span id="bossHpText" class="font-mono text-amber-300">320 / 500 HP</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-5 rounded-full overflow-hidden p-1 border border-red-900/60">
+                                <div id="bossHpFill" class="h-full hp-bar-fill rounded-full" style="width: 64%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Battle Attack Button -->
+                        <div class="pt-6 flex justify-center">
+                            <button onclick="UI.attackBoss()" class="px-8 py-3.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-red-600/30 transition transform hover:scale-105 flex items-center gap-2">
+                                <span>⚔️ Launch Quick Revision Strike (-90 HP)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: WEEKLY LEAGUES (~20 PEERS) -->
+            <div id="tab_leagues" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-bold text-white">Silver League (Division 4 - Cohort #12)</h3>
+                                <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono">20 Students</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">
+                                Fair & Inclusive: You compete only against students with similar learning paces. Top 3 promote, bottom 5 relegate.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-slate-400 font-mono">Season Ends in: 4d 18h</span>
+                        </div>
+                    </div>
+
+                    <!-- League Table -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/90 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <th class="py-3 px-4">Rank</th>
+                                    <th class="py-3 px-4">Student</th>
+                                    <th class="py-3 px-4">Weekly XP</th>
+                                    <th class="py-3 px-4">Streak</th>
+                                    <th class="py-3 px-4">League Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leagueTableBody" class="text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: TEAM BATTLE (SECTION VS SECTION) -->
+            <div id="tab_teambattle" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="mb-6">
+                        <span class="text-xs font-bold font-mono text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
+                            CAMPUS CLASH WEEKEND
+                        </span>
+                        <h3 class="text-xl font-bold text-white mt-2">Section vs Section Coding Battle</h3>
+                        <p class="text-xs text-slate-400 mt-1">Aggregate XP earned by each batch. Study together, win together!</p>
+                    </div>
+
+                    <div id="teamBattleContainer" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: REWARDS STORE -->
+            <div id="tab_store" class="tab-content hidden space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">🛍️ MSOT Student Rewards Store</h3>
+                            <p class="text-xs text-slate-400 mt-1">Redeem earned learning XP for real non-academic MSOT perks.</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Your Balance</span>
+                            <span class="font-mono font-bold text-amber-300 text-lg" id="storeBalanceDisplay">780 XP</span>
+                        </div>
+                    </div>
+
+                    <div id="storeContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: FACULTY & ADMIN INTELLIGENCE PORTAL-->
+        <!-- ========================================== -->
+        <div id="facultyPortalView" class="hidden space-y-6">
+
+            <!-- Faculty Metrics Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Weekly Class Engagement</span>
+                    <h3 class="text-3xl font-extrabold text-emerald-400 font-mono mt-1" id="facultyEngRate">82%</h3>
+                    <p class="text-xs text-slate-400 mt-1">+14% increase since gamification kickoff</p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">At-Risk Inactive Students</span>
+                    <h3 class="text-3xl font-extrabold text-red-400 font-mono mt-1">3 Students</h3>
+                    <p class="text-xs text-slate-400 mt-1">Gone quiet for 5+ consecutive days</p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Anti-Gaming Flags</span>
+                    <h3 class="text-3xl font-extrabold text-amber-400 font-mono mt-1">3 Alerts</h3>
+                    <p class="text-xs text-slate-400 mt-1">Auto-quarantined for faculty review</p>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout for Faculty Details -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- 1. At-Risk Alert: Students Quiet for 5+ Days (Must-Have #8) -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>🚨 Early Intervention: Quiet for 5+ Days</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Proactively identify students before they drop out or fail mid-terms</p>
+                    </div>
+                    <div id="facultyQuietList" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- 2. Struggle Topics Heatmap (Must-Have #8) -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>📊 Quiz Struggle Analytics by Topic</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Derived from daily micro-quiz accuracy patterns</p>
+                    </div>
+                    <div id="facultyTopicsList" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dynamic XP Rules Engine (Must-Have #2) -->
+            <div class="glass-panel p-6 md:p-8 rounded-2xl border border-slate-800 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">⚙️ Dynamic XP Rules Engine (Admin Configurable)</h3>
+                        <p class="text-xs text-slate-400 mt-1">Faculty & Admin can tweak XP rewards without changing code to prevent farming.</p>
+                    </div>
+                    <button onclick="alert('✅ Rules updated and synchronized with database!')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">
+                        Save Rules to DB
+                    </button>
+                </div>
+
+                <div id="rulesSlidersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Anti-Gaming Audit Logs (Must-Have #9) -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                <div>
+                    <h3 class="text-base font-bold text-white">🛡️ Anti-Gaming System Logs</h3>
+                    <p class="text-xs text-slate-400">Rate limits on quizzes, copy-paste answer detection, and abnormal XP surge detection.</p>
+                </div>
+                <div id="facultyAlertsList" class="space-y-3">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- AUTHENTICATION / LOGIN MODAL -->
+    <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-700 shadow-2xl relative">
+            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                ✕
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-2xl mx-auto mb-2 shadow-lg shadow-indigo-600/30">
+                    ⚡
+                </div>
+                <h3 class="text-xl font-bold text-white">Sign In to MSOT Quest</h3>
+                <p class="text-xs text-slate-400">Connected to Supabase PostgreSQL Auth</p>
+            </div>
+
+            <form onsubmit="event.preventDefault(); document.getElementById('authModal').classList.add('hidden'); alert('Signed in successfully!');" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">MSOT Email</label>
+                    <input type="email" value="rahul.sharma@msot.edu" required class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm focus:border-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" value="••••••••••••" required class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm focus:border-indigo-500 outline-none">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-indigo-600/25">
+                    Sign In with Supabase
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-800 text-center">
+                <p class="text-[11px] text-slate-400 mb-2">Hackathon Quick Test Accounts:</p>
+                <div class="flex gap-2">
+                    <button onclick="UI.switchRole('student'); document.getElementById('authModal').classList.add('hidden');" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-semibold rounded-lg border border-slate-700">
+                        Demo Student (Rahul)
+                    </button>
+                    <button onclick="UI.switchRole('faculty'); document.getElementById('authModal').classList.add('hidden');" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-semibold rounded-lg border border-slate-700">
+                        Demo Faculty (Prof. Sen)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

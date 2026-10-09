@@ -1,0 +1,131 @@
+/* ==========================================================
+   MSOT QUEST - GAMIFIED LEARNING PLATFORM STYLES
+   ========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+    --primary: #4f46e5;
+    --primary-glow: rgba(79, 70, 229, 0.4);
+    --gold: #f59e0b;
+    --fire: #ef4444;
+    --emerald: #10b981;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Flame animation for streak */
+@keyframes flameFlicker {
+    0%, 100% {
+        transform: scale(1) rotate(-1deg);
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
+    }
+    50% {
+        transform: scale(1.15) rotate(2deg);
+        filter: drop-shadow(0 0 20px rgba(249, 115, 22, 1));
+    }
+}
+
+.flame-active {
+    animation: flameFlicker 1.8s ease-in-out infinite;
+    display: inline-block;
+}
+
+/* Boss Monster Floating Animation */
+@keyframes bossFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(1deg);
+    }
+}
+
+.boss-float {
+    animation: bossFloat 3s ease-in-out infinite;
+}
+
+/* Boss Health Bar Pulse */
+@keyframes hpShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.hp-bar-fill {
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #ef4444);
+    background-size: 200% 100%;
+    animation: hpShimmer 3s linear infinite;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Level Up Badge Pulse */
+@keyframes badgeGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+    }
+}
+
+.glow-card {
+    animation: badgeGlow 4s ease-in-out infinite;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card-hover {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-hover:hover {
+    transform: translateY(-3px);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.25);
+}
+
+/* Shimmer animation for points */
+@keyframes shimmerGold {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.8; }
+}
+
+.gold-pulse {
+    animation: shimmerGold 2s infinite ease-in-out;
+}
