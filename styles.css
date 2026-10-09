@@ -149,7 +149,7 @@ code, .font-mono {
 }
 
 /* ==========================================================
-   CINEMATIC TORII HERO GATE (OPTIONAL MODAL VIEW)
+   CINEMATIC TORII HERO GATE (FIRST LOAD ENTRY EXPERIENCE)
    ========================================================== */
 #heroGateOverlay {
     position: fixed;
@@ -157,24 +157,16 @@ code, .font-mono {
     z-index: 1000;
     background: #04060c;
     overflow: hidden;
-    display: none !important; /* Hidden by default - Never blocks the app */
+    display: flex;
     align-items: center;
     justify-content: center;
-    perspective: 1200px;
-}
-
-#heroGateOverlay.active-gate {
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
+    perspective: 1400px;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s ease;
 }
 
 #heroGateOverlay.gate-opened {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    display: none !important;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Torii Stage & kasagi roof */

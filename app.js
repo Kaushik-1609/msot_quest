@@ -710,9 +710,13 @@ const UI = {
     },
 
     switchTab(targetTab) {
+        if (!targetTab) return;
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         const tabEl = document.getElementById(`tab_${targetTab}`);
-        if (tabEl) tabEl.classList.remove('hidden');
+        if (tabEl) {
+            tabEl.classList.remove('hidden');
+            tabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
         document.querySelectorAll('.tab-nav-btn').forEach(b => {
             b.classList.remove('border-indigo-500', 'text-indigo-400', 'bg-slate-800/60');
@@ -721,8 +725,23 @@ const UI = {
             }
         });
 
-        if (targetTab === 'fight') {
+        // Trigger section specific initializations
+        if (targetTab === 'arcade' && typeof Arcade !== 'undefined') {
+            Arcade.renderGamesGrid();
+        } else if (targetTab === 'fight' && typeof CodeFighter !== 'undefined') {
             CodeFighter.init();
+        } else if (targetTab === 'quiz') {
+            this.renderDailyQuiz();
+        } else if (targetTab === 'boss') {
+            this.renderBossBattle();
+        } else if (targetTab === 'leagues') {
+            this.renderLeague();
+        } else if (targetTab === 'teambattle') {
+            this.renderTeamBattle();
+        } else if (targetTab === 'store') {
+            this.renderStore();
+        } else if (targetTab === 'overview') {
+            this.renderQuests();
         }
     },
 
@@ -771,6 +790,16 @@ const UI = {
                 this.switchTab(targetTab);
             });
         });
+
+        // Listen for URL hash changes (e.g. #arcade, #fight)
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#/', '').replace('#', '');
+            if (hash) this.switchTab(hash);
+        });
+        if (window.location.hash) {
+            const initialHash = window.location.hash.replace('#/', '').replace('#', '');
+            if (initialHash && initialHash !== 'gates') this.switchTab(initialHash);
+        }
     },
 
     toggleAuthMode(mode) {
@@ -1578,6 +1607,7 @@ const CodeFighter = {
 window.UI = UI;
 window.Arcade = Arcade;
 window.CodeFighter = CodeFighter;
+window.switchTab = (t) => UI.switchTab(t);
 window.enterGate = (e) => UI.enterGate(e);
 window.openGateAndEnterArcade = (e) => UI.enterGate(e);
 
